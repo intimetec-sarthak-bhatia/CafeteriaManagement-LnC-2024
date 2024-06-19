@@ -6,11 +6,11 @@ Steps to run this project:
 
 ## Use case diagram
 
-![Use case diagram](/Cafeteria%20Management/UML%20diagrams/use-case.png)
+![Use case diagram](/UML%20diagrams/use-case.png)
 
 ## Entity Relation diagram
 
-![ER diagram](/Cafeteria%20Management/UML%20diagrams/ER-Diagram.png)
+![ER diagram](/UML%20diagrams/ER-Diagram.png)
 
 ## Class diagram
 
