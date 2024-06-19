@@ -22,12 +22,9 @@
     "socket.io-client": "^4.7.5"
   },
   "scripts": {
-    "start:server": "tsc && nodemon src/socketProgramming/server.js",
-    "start:client": "tsc && nodemon src/socketProgramming/client.js",
-    "run:file": "ts-node src/index.ts",
-    "typeorm": "typeorm-ts-node-commonjs",
-    "migrate:gen": "./node_modules/.bin/typeorm migration:generate -d ./src/data-source.js",
-    "migrate:up": "./node_modules/.bin/typeorm migration:run -d ./src/data-source.js",
-    "migrate:down": "./node_modules/.bin/typeorm migration:revert -d ./src/data-source.js"
+    "start:server": "ts-node src/socketProgramming/server.ts",
+    "start:client": "ts-node src/socketProgramming/client.ts",
+    "run:file": "ts-node src/index.ts"
+
   }
 }

@@ -1,5 +1,5 @@
-import { User } from './entity/User';
-import { UserService } from './User/user.service';
+import { User } from './Entity/User';
+import { UserService } from './Services/user';
 
 async function main() {
   const userService = new UserService();

@@ -1,61 +1,56 @@
-import { Server } from 'socket.io';
-import * as readline from 'readline';
-import { UserService } from '../User/user.service';
+import { Server, Socket } from "socket.io";
+import { UserService } from "../Services/user";
+import AuthService from "../Services/authentication";
+import { UserRoleService } from "../Services/userRole";
 
-const io = new Server(4000);
-const userService = new UserService();
+class CafeteriaManagementServer {
+  private io: Server;
+  private userService: UserService;
+  private authService: AuthService;
+  private roleService: UserRoleService;
 
-io.on('connection', (socket) => {
-    io.emit('server-message', initMessage);
-    socket.on('send-message', async (msg) => {
-        console.log('\nReceived from client:', msg);
-        const [command, args] = msg.split(':');
-        switch (command) {
-            case 'Login':
-                io.emit('server-message', 'Please Enter email and Password: ');
-                socket.once('send-message', async (loginMsg: string) => {
-                    const [email, password] = loginMsg.split(',');
-                    try {
-                        const user = await userService.getUserByEmail(email, password);
-                        io.emit('server-message', `Login successful! Welcome, ${user.name}`);
+  constructor(port: number) {
+    this.io = new Server(port);
+    this.userService = new UserService();
+    this.authService = new AuthService();
+    this.roleService = new UserRoleService();
 
-                        if(user) {
-                            const commands = await userService.getCommands(user.roleId);
-                            io.emit('server-message', commands.join('\n'));
+    this.io.on("connection", (socket: Socket) => this.handleConnection(socket));
+  }
 
-                        }
-                    } catch (error) {
-                        io.emit('server-message', `Login failed: ${error.message}`);
-                    }
-                });
-                break;
-            case 2 ||'Signup':
-                io.emit('server-message', 'Enter firstName, email, password and roleId');
-                socket.once('send-message', async (signupMsg) => {
-                    const [name, signupEmail, signupPassword, roleId] = signupMsg.split(',');
-                    try {
-                        const newUser = await userService.createUserWithRole(name, signupEmail, signupPassword, roleId);
-                        io.emit('server-message', `Registration successful! Welcome, ${name} with id ${newUser}`);
-                    } catch (error) {
-                        io.emit('server-message', `Registration failed: ${error.message}`);
-                    }
-                });
-                break;
-            case 3 || 'Exit':
-                io.emit('server-message', 'Goodbye!');
-                process.exit(0);
-            default:
-                io.emit('server-message', 'Invalid command. Please try again.');
-                io.emit('server-message', initMessage);
-                break;
-        }
-        // promptMessage();
+  private handleConnection(socket: Socket) {
+    console.log('A client is now connected with id :', socket.id);
+
+    socket.on("user-creds", async (userCreds: any) => {
+      console.log("\nReceived from client:", userCreds);
+      await this.handleLogin(socket, userCreds);
     });
-});
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+    socket.on("disconnect", () => {
+      console.log(`Client ${socket.id} disconnected :( `,);
+    });
+  }
 
-const initMessage = "Choose one of the following commands: \n1. Login\n2. Signup\n3. Exit\n";
+  private async handleLogin(socket: Socket, userCreds: any) {
+    try {
+      const loginUser = await this.authService.validateUser(
+        userCreds.email,
+        userCreds.password
+      );
+      if (!loginUser) {
+        socket.emit("login", null); 
+      } else {
+        const userRole = await this.roleService.getById(loginUser.roleId);
+        socket.emit("login", {name: loginUser.name, role: userRole.roleName}); 
+      }
+    } catch (error) {
+      console.log("Error during login:", error);
+      socket.emit("login", null);
+    }
+  }
+
+}
+
+const server = new CafeteriaManagementServer(4000);
+
+export default CafeteriaManagementServer;
