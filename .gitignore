@@ -136,5 +136,9 @@ node_modules/
 build/
 tmp/
 temp/
+<<<<<<< HEAD
 tsconfig.json
 >>>>>>> 6df1872 (Inital Commit)
+=======
+.env
+>>>>>>> 2110df4 (Admin-CRUD-Implementation)

@@ -1,8 +1,11 @@
 import { Socket, io } from 'socket.io-client';
 import { readLine } from '../utils/readline';
 import PromptUtils from '../utils/PromptUtils';
-import AdminClient from './adminClient';
-import GetOptions from './adminClient';
+import GetOptions from '../utils/GetOptions';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 
 class CafeteriaManagementClient {
     protected socket: Socket;
@@ -25,16 +28,12 @@ class CafeteriaManagementClient {
         this.socket.on('disconnect', this.disconnect);
         this.checkLoginStatus();
         
+        
     }
 
-    protected proceedLogin(User) {
-        console.log(`${User.role} logged in successfully`);
-        const options = this.getOptionsByRole.getOptionsByRole(User.role);
-        options.map((option, index) => {
-            console.log(`${index + 1}. ${option}`);
-        });
-        const selectedOption = PromptUtils.promptMessage('Enter your choice: ');
-        this.socket.emit('user-options', selectedOption, User.role);
+    protected async proceedAfterLogin(User) {
+        const payload = await this.getOptionsByRole.getOptionsByRole(User.role);
+        this.socket.emit('user-options', {payload: payload, role: User.role});
     }
 
     async getUserCreds() {
@@ -48,17 +47,35 @@ class CafeteriaManagementClient {
     }
 
     checkLoginStatus() {
-        this.socket.on('login', (loginUser: any) => {
+        this.socket.on('login', async(loginUser: any) => {
             if (!loginUser) {
                 console.log('Invalid Credentials! Please try again');
                 this.getUserCreds();
             } else {
                 console.log('Welcome !', loginUser);
-                const option = this.proceedLogin(loginUser)
+                console.log(`${loginUser.role} logged in successfully`);
+                const option = this.proceedAfterLogin(loginUser)
                 this.socket.emit('user-options', option, loginUser.role);
+                await this.handleUserOptionResponse(loginUser);
+                
             }
         });
     }
+
+    async handleUserOptionResponse(user) {
+        this.socket.on('option-response', async (response: any) => {
+            console.log('Response:', response.response, '\n Please select an option: \n 1. Main Menu \n 2. Logout');
+            const selectedOption = await PromptUtils.promptMessage('Enter option: ');
+            if(selectedOption === '1') {
+                this.proceedAfterLogin(user);
+            }
+            else {
+                this.disconnect();
+            }
+
+        });
+    }
+
 
     promptMessage(message: string): Promise<string> {
         return new Promise((resolve) => {
@@ -74,6 +91,6 @@ class CafeteriaManagementClient {
       };
 }
 
-const client = new CafeteriaManagementClient('http://localhost:4000');
+const client = new CafeteriaManagementClient(`http://localhost:${process.env.SERVER_PORT}`);
 
 export default CafeteriaManagementClient;

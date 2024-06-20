@@ -3,11 +3,12 @@ import { User } from '../Entity/User';
 
 export class UserRepository {
   async createUser(user: User): Promise<number> {
+    console.log("InRepo:", user);
     const connection = await pool.getConnection();
     try {
       const [result] = await connection.query<any>(
-        'INSERT INTO user (email, name, password, roleId) VALUES (?, ?, ?, ?)',
-        [user.email, user.name, user.password, user.roleId]
+        'INSERT INTO user (name, email, password, roleId) VALUES (?, ?, ?, ?)',
+        [user.name, user.email, user.password, user.roleId]
       );
       return result.insertId;
     } catch (error) {

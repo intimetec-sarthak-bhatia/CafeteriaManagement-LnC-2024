@@ -1,19 +1,78 @@
+import PromptUtils from "./PromptUtils";
+
 class GetOptions {
 
-    private options: { [key: string]: string[] };
+    private roleOptions: { [key: string]: { options: string[], questions: { [key: number]: string[] } } };
 
     constructor() {
-        this.options = {
-            'Admin': ['Add Employee', 'Add Menu', 'View Orders', 'Logout'],
-            'Chef': ['View Orders', 'Logout'],
-            'Employee': ['View Orders', 'Logout']
+        this.roleOptions = {
+            'Admin': {
+                options: ['Add Employee', 'Add Menu Item', 'View Menu Items', 'Update Menu Item Price', 'Update Menu Item Availability'],
+                questions: {
+                    1: ['Enter Employee Name: ', 'Enter Employee Email: ', 'Enter Employee Password: ', 'Enter Employee Role: '],
+                    2: ['Enter Menu Item Name: ', 'Enter Menu Item Price: ', 'Enter Menu Item MealType: ', 'Enter Item Availability:'],
+                    4: ['Enter Menu Item Name: ', 'Enter New Price: '],
+                    5: ['Enter Menu Item Name: ', 'Enter New Availability: ']
+                }
+            },
+            'Chef': {
+                options: [],
+                questions: {
+                    1: ['Enter Order ID: ']
+                }
+            },
+            'Employee': {
+                options: ['View Orders', 'View Notifications'],
+                questions: {
+                    1: ['Enter Order ID: ']
+                }
+            }
         };
     }
 
-    public getOptionsByRole(role: any) {
-        return this.options[role] || [];
+    private async promptMessageByOption(option: number, role: string): Promise<{ [key: string]: string }> {
+        const prompts = this.roleOptions[role].questions[option];
+        const answers: { [key: string]: string } = {};
+        for (let i = 0; i < prompts.length; i++) {
+            const question = prompts[i];
+            const answer = await PromptUtils.promptMessage(question);
+            answers[`arg${i + 1}`] = answer;
+        }
+        return answers;
     }
 
+    public async getOptionsByRole(role: string): Promise<{ selectedOption: number, answers: { [key: string]: string } | null }> {
+        const roleOptionData = this.roleOptions[role];
+        if (!roleOptionData) {
+            console.log('Invalid role.');
+            return;
+        }
+
+        const options = roleOptionData.options;
+        options.map((option, index) => {
+            console.log(`${index + 1}. ${option}`);
+        });
+
+        const selectedOption = parseInt(await PromptUtils.promptMessage('Enter your choice: '));
+
+        if (isNaN(selectedOption) || selectedOption < 1 || selectedOption > options.length) {
+            console.log('Invalid choice.');
+            return;
+        }
+
+        const nonPromptingOptions: { [key: string]: number[] } = {
+            'Admin': [3], 
+            'Chef': [1, 2], 
+            'Employee': [1, 2]
+        };
+
+        if (nonPromptingOptions[role] && nonPromptingOptions[role].includes(selectedOption)) {
+            return { selectedOption: selectedOption, answers: null };
+        }
+
+        const answers = await this.promptMessageByOption(selectedOption, role);
+        return { selectedOption: selectedOption, answers };
+    }
 }
 
 export default GetOptions;
