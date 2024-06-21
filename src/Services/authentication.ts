@@ -1,5 +1,5 @@
 // auth.service.ts
-import { User } from '../Entity/User';
+import { User } from '../Interface/User';
 import { UserService } from './user';
 
 class AuthService {

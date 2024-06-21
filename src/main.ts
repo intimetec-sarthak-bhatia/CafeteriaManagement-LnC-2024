@@ -1,4 +1,4 @@
-import { User } from './Entity/User';
+import { User } from './Interface/User';
 import { UserService } from './Services/user';
 
 async function main() {

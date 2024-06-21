@@ -1,5 +1,5 @@
 import pool from '../database';
-import { MenuItem } from '../entity/MenuItem';
+import { MenuItem } from '../Interface/MenuItem';
 
 export class MenuItemRepository {
     
@@ -17,6 +17,27 @@ export class MenuItemRepository {
             connection.release();
         }
     }
+
+    async getTopMenuItems(amount: number): Promise<MenuItem[]> {
+        const connection = await pool.getConnection();
+        try {
+            const [rows] = await connection.query<any>(
+                `SELECT mi.id, mi.name, mi.availability, mi.sentiment_score,  mi.mealType,
+                        IFNULL(AVG(f.rating), 0) AS average_rating
+                 FROM MenuItem mi
+                 LEFT JOIN Feedback f ON mi.id = f.item_id
+                 GROUP BY mi.id, mi.name
+                 ORDER BY mi.sentiment_score DESC
+                 LIMIT ?`,
+                [amount]
+            );
+            return rows;
+        } catch (error) {
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }   
 
     async getAllMenuItems(): Promise<MenuItem[]> {
         const connection = await pool.getConnection();

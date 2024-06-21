@@ -1,6 +1,6 @@
 import { MenuItemService } from "../Services/menuItem";
 import { UserService } from "../Services/user";
-import { MenuItem } from "../entity/MenuItem";
+import { MenuItem } from "../Interface/MenuItem";
 
 class AdminController {
 
@@ -34,8 +34,8 @@ class AdminController {
 
 
     private async addEmployee(name: string, email:string , password: string, role: number): Promise<string> {
-        const userId = await this.userService.createUser(name, email, password, role);
-        return 'User added successfully with id:'+ userId;
+        const result = await this.userService.createUser(name, email, password, role);
+        return result;
     }
 
     private async addMenuItem(name: string, mealType: string, price: string, availability: string): Promise<string> {

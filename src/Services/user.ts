@@ -1,13 +1,14 @@
-import { UserRoleRepository } from '../Repository/userRole.repository';
-import { User } from '../Entity/User';
-import { UserRepository } from '../Repository/user.repository';
+import { UserRoleRepository } from '../Repository/userRole';
+import { User } from '../Interface/User';
+import { UserRepository } from '../Repository/user';
 
 export class UserService {
   private userRepository = new UserRepository();
 
-  async createUser(name: string,email: string, password: string, roleId: number): Promise<number> {
+  async createUser(name: string,email: string, password: string, roleId: number): Promise<string> {
     const user = {name, email, password, roleId};
-    return await this.userRepository.createUser(user);
+    const userId = await this.userRepository.createUser(user);
+    return 'User added successfully! with id: ' + userId;
   }
 
   async getUsers(): Promise<User[]> {

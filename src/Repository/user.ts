@@ -1,5 +1,5 @@
 import pool from '../database';
-import { User } from '../Entity/User';
+import { User } from '../Interface/User';
 
 export class UserRepository {
   async createUser(user: User): Promise<number> {

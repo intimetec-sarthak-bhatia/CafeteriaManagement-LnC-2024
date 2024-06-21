@@ -1,8 +1,10 @@
+import { MealTypeRepository } from "../Repository/mealType";
 import { MenuItemRepository } from "../Repository/menuItem";
-import { MenuItem } from "../entity/MenuItem";
+import { MenuItem } from "../Interface/MenuItem";
 
 export class MenuItemService {
   private menuRepository = new MenuItemRepository();
+  private mealTypeRepository = new MealTypeRepository();
 
   async addMenuItem(
     name: string,
@@ -24,12 +26,28 @@ export class MenuItemService {
    const result = await this.menuRepository.getAllMenuItems();
    return result;
   }
+  
 
-    // async getByMealType(mealType: string): Promise<MenuItem[]> {
+  async getTopMenuItems(amount: number = 5): Promise<any> {
+    const menuItems = await this.menuRepository.getTopMenuItems(amount);
+    const groupedItems = {
+      breakfast: [],
+      'lunch/dinner': []
+    };
 
-    //     const result = await this.menuRepository.findByMealType(mealType);
-    //     return result;
-    // }
+    for (const item of menuItems) {
+      const mealType = await this.mealTypeRepository.getMealTypeById(item.mealType);
+      
+      if (mealType === 'breakfast') {
+        groupedItems.breakfast.push(item);
+      } else {
+        groupedItems['lunch/dinner'].push(item);
+      }
+    }
+
+    return groupedItems;
+  }
+
 
   async updatePrice(price: number, name: string): Promise<string> {
     try {

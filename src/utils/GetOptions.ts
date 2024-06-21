@@ -1,10 +1,13 @@
+import { Socket } from "socket.io-client";
 import PromptUtils from "./PromptUtils";
 
 class GetOptions {
 
     private roleOptions: { [key: string]: { options: string[], questions: { [key: number]: string[] } } };
+    private socket: Socket;
 
-    constructor() {
+    constructor(socket: Socket) {
+        this.socket = socket;
         this.roleOptions = {
             'Admin': {
                 options: ['Add Employee', 'Add Menu Item', 'View Menu Items', 'Update Menu Item Price', 'Update Menu Item Availability'],
@@ -16,29 +19,31 @@ class GetOptions {
                 }
             },
             'Chef': {
-                options: [],
+                options: ['View Top 5 Recommended Items', 'Rollout Menu'],
                 questions: {
-                    1: ['Enter Order ID: ']
+                    2: ['Enter Breakfast Option Ids: ', 'Enter Lunch Option Ids: ', 'Enter Dinner Option Ids: ']
                 }
             },
-            'Employee': {
-                options: ['View Orders', 'View Notifications'],
+            'employee': {
+                options: ['Give FeedBack: ', 'Vote for meals'],
                 questions: {
-                    1: ['Enter Order ID: ']
+                    2: ['']
                 }
             }
         };
     }
 
     private async promptMessageByOption(option: number, role: string): Promise<{ [key: string]: string }> {
-        const prompts = this.roleOptions[role].questions[option];
-        const answers: { [key: string]: string } = {};
-        for (let i = 0; i < prompts.length; i++) {
-            const question = prompts[i];
-            const answer = await PromptUtils.promptMessage(question);
-            answers[`arg${i + 1}`] = answer;
-        }
-        return answers;
+       
+            const prompts = this.roleOptions[role].questions[option];
+            const answers: { [key: string]: string } = {};
+            for (let i = 0; i < prompts.length; i++) {
+                const question = prompts[i];
+                const answer = await PromptUtils.promptMessage(question);
+                answers[`arg${i + 1}`] = answer;
+            }
+            return answers;
+        
     }
 
     public async getOptionsByRole(role: string): Promise<{ selectedOption: number, answers: { [key: string]: string } | null }> {
@@ -62,14 +67,20 @@ class GetOptions {
 
         const nonPromptingOptions: { [key: string]: number[] } = {
             'Admin': [3], 
-            'Chef': [1, 2], 
-            'Employee': [1, 2]
+            'Chef': [1], 
+            'employee': []
         };
 
         if (nonPromptingOptions[role] && nonPromptingOptions[role].includes(selectedOption)) {
             return { selectedOption: selectedOption, answers: null };
         }
 
+        if(role==='employee' && selectedOption===1) {
+            this.socket.emit('feedback/getRolledoutItems', '');
+            this.socket.on('feedback/rolledoutItems', (items: any) => {
+                console.log('Rolled out items:', items);
+            });
+        }
         const answers = await this.promptMessageByOption(selectedOption, role);
         return { selectedOption: selectedOption, answers };
     }
