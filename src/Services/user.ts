@@ -17,11 +17,9 @@ export class UserService {
 
   async getUserByEmail(email: string): Promise<User> {
     const user =  await this.userRepository.getUserByEmail(email);
-
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('Invalid Credentials!');
     }
-
     return user;
   }
 }

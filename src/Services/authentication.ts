@@ -11,11 +11,10 @@ class AuthService {
 
     async validateUser(email: string, password: string): Promise<User | null> {
             const user = await this.userService.getUserByEmail(email);
-            if(!user) return null;
             if (user && user.password === password) {
                 return user;
             }
-            return null
+            throw new Error('Invalid Credentials!');
     }
 }
 

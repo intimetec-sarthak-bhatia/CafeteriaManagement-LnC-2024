@@ -30,22 +30,18 @@ export class MenuItemService {
 
   async getTopMenuItems(amount: number = 5): Promise<any> {
     const menuItems = await this.menuRepository.getTopMenuItems(amount);
-    const groupedItems = {
-      breakfast: [],
-      'lunch/dinner': []
-    };
 
     for (const item of menuItems) {
       const mealType = await this.mealTypeRepository.getMealTypeById(item.mealType);
-      
+      delete item.mealType;
       if (mealType === 'breakfast') {
-        groupedItems.breakfast.push(item);
+        item.category = 'breakfast';
       } else {
-        groupedItems['lunch/dinner'].push(item);
+        item.category = 'lunch/dinner';
       }
     }
 
-    return groupedItems;
+    return menuItems;
   }
 
 
@@ -66,6 +62,20 @@ export class MenuItemService {
     } catch (error) {
         throw error;
     }
+  }
+
+  async updateSentimentScore(score: number, id: number): Promise<string> {
+    try {
+        await this.menuRepository.updateSentimentScore(score, id);
+        return 'Sentiment score updated successfully!';
+    } catch (error) {
+        throw error;
+    }
+  }
+
+  async getMenuItemById(id: number): Promise<MenuItem> {
+    const result = await this.menuRepository.getMenuItemById(id);
+    return result;
   }
 
 

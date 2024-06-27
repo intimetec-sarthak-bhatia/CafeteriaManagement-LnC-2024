@@ -3,7 +3,6 @@ import { UserRepository } from "../Repository/user";
 import { UserRole } from "../Interface/UserRole";
 
 export class UserRoleService {
-//   private userRepository = new UserRepository();
   private userRoleRepository = new UserRoleRepository();
 
   async getById(id: number): Promise<UserRole> {

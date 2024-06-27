@@ -7,4 +7,5 @@ export interface MenuItem {
     times_prepared?: number; 
     availability: number;
     sentiment_score?: number | null; 
+    category?: string;
 }

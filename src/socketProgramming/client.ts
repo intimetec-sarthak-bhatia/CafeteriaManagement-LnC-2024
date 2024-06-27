@@ -2,73 +2,61 @@ import { Socket, io } from 'socket.io-client';
 import PromptUtils from '../utils/PromptUtils';
 import GetOptions from '../utils/GetOptions';
 import * as dotenv from 'dotenv';
+import AdminClient from '../Client-Controller/admin.client';
+import { RequestInterface } from '../Interface/request';
+import ChefClient from '../Client-Controller/chef.client';
+import EmployeeClient from '../Client-Controller/employee.client';
 
 dotenv.config();
 
 
 class CafeteriaManagementClient {
     protected socket: Socket;
-    private getOptionsByRole: GetOptions;
+    private adminClient: AdminClient;
+    private chefClient: ChefClient;
+    private employeeClient: EmployeeClient;
 
     constructor(protected serverUrl: string) {
         this.serverUrl = serverUrl;
         this.socket = io(this.serverUrl);
         this.initializeConnection()
-        this.getOptionsByRole = new GetOptions(this.socket);
+        this.adminClient = new AdminClient();
+        this.chefClient = new ChefClient();
+        this.employeeClient = new EmployeeClient();
     }
 
 
     protected initializeConnection() {
-        this.socket.on('connect', async() => {
+        this.socket.on('connect', () => {
             console.log('Welcome to Cafeteria Management! \nPlease enter user credentials to login: ');
-            const {email, password} = await this.getUserCreds();
-            this.socket.emit('user-creds', { email, password});
-            this.checkLoginStatus();
+            this.getUserCreds();
         });
         this.socket.on('disconnect', this.disconnect);
-        
-        this.initPublicHost()
+        this.checkLoginStatus();
     }
 
-    protected async proceedAfterLogin(User) {
-        const payload = await this.getOptionsByRole.getOptionsByRole(User.role);
-        this.socket.emit('user-options', {payload: payload, role: User.role});
-    }
-
-    async initPublicHost() {
-        const {email, password} = await this.getUserCreds();
-
-        this.socket.emit('Authenticate', { userId: email, password });
-        this.socket.on('Authenticate', (response: any) => {
-            response.options.forEach((res: any, index: number) => {
-                console.log( index + 1, res );
-            });
-        })
-        const selectedOption = await PromptUtils.promptMessage('Enter your choice: ');
-        const getAddMenuOptions = await this.getAddMenuOptions();
-        
-        this.socket.emit('Option selection',{selectedOption: selectedOption,payload:getAddMenuOptions});
-
-        this.socket.on("Option Selection",(response) => {
-            console.log(response.message);
-
-        })
-    }
-
-    async getAddMenuOptions() {
-        const categoryId = await PromptUtils.promptMessage('Enter Category ID : ');
-        const name = await PromptUtils.promptMessage("Enter Item Name : ");
-        const price = await PromptUtils.promptMessage("Enter Item Price : ");
-        const availabilityStatus = await PromptUtils.promptMessage("Enter Availability Status : ")
-        return {categoryId,name,price,availabilityStatus};
+    protected async handleRequest(User, event?: string, selectedOption?: number) {
+        let payload: RequestInterface = {};
+        switch (User.role) {
+            case 'Admin':
+                payload =  await this.adminClient.requestHandler(User);
+                break;
+            case 'Chef':
+                payload =  await this.chefClient.requestHandler(User);
+                break;
+            case 'employee':
+                payload = await this.employeeClient.requestHandler(User,event,selectedOption);
+                break;
+        }
+        payload.user = {id: User.id, role: User.role};
+        this.socket.emit('request',payload);
     }
 
     async getUserCreds() {
         try {
             const email = await PromptUtils.promptMessage('Enter email: ');
             const password = await PromptUtils.promptMessage('Enter password: ');
-            return {email, password};
-            // this.socket.emit('user-creds', { email, password });
+            this.socket.emit('authenticate', { email, password });
         } catch (err) {
             console.error('Error getting user credentials:', err);
         }
@@ -76,27 +64,42 @@ class CafeteriaManagementClient {
 
     checkLoginStatus() {
         this.socket.on('login', async(loginUser: any) => {
-            if (!loginUser) {
-                console.log('Invalid Credentials! Please try again');
+            if (loginUser.error) {
+                console.log('Error:', loginUser.error + '\nPlease try again');
                 this.getUserCreds();
             } else {
                 console.log('Welcome !', loginUser);
                 console.log(`${loginUser.role} logged in successfully`);
-                const option = this.proceedAfterLogin(loginUser)
-                this.socket.emit('user-options', option, loginUser.role);
-                await this.handleUserOptionResponse(loginUser);
+                await this.handleRequest(loginUser)
+                await this.handleResponse(loginUser);
                 
             }
         });
     }
 
-    async handleUserOptionResponse(user) {
-        this.socket.on('option-response', async (serverResponse: any) => {
-            console.log('Response:', serverResponse.response);
+    async handleResponse(user) {
+        this.socket.on('response', async (response: any) => {
+            switch(user.role) {
+                case 'Admin':
+                    await this.adminClient.responseHandler(response);
+                    break;
+                case 'Chef':
+                    await this.chefClient.responseHandler(response);
+                    break;
+                case 'employee':
+                    await this.employeeClient.responseHandler(response);
+                    break;
+                default: 'Invalid role'
+            }
+            if(response.user.role === 'employee' && response.event === 'secondInteration') {
+                await this.handleRequest(user,response.event, response.selectedOption);
+                return;
+            }
+
             console.log('\n Please select an option: \n 1. Main Menu \n 2. Logout');
             const selectedOption = await PromptUtils.promptMessage('Enter option: ');
             if(selectedOption === '1') {
-                this.proceedAfterLogin(user);
+                this.handleRequest(user);
             }
             else {
                 this.disconnect();
@@ -111,6 +114,6 @@ class CafeteriaManagementClient {
       };
 }
 
-const client = new CafeteriaManagementClient(`http://172.16.0.222:8081`);
+const client = new CafeteriaManagementClient(`http://localhost:${process.env.SERVER_PORT}`);
 
 export default CafeteriaManagementClient;

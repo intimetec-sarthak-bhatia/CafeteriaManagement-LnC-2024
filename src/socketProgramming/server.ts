@@ -2,24 +2,26 @@ import { Server, Socket } from "socket.io";
 import AuthService from "../Services/authentication";
 import { UserRoleService } from "../Services/userRole";
 import * as dotenv from 'dotenv';
-import AdminController from "../Controller/admin";
-import ChefController from "../Controller/chef";
+import AdminController from "../Server-Controller/admin.server";
+import ChefController from "../Server-Controller/chef.server";
+import { ResponseInterface } from "../Interface/response";
+import EmployeeController from "../Server-Controller/employee.server";
 
 dotenv.config();
 
 class CafeteriaManagementServer {
   private io: Server;
   private authService: AuthService;
-  private roleService: UserRoleService;
   private adminController: AdminController;
   private chefController: ChefController;
+  private employeeController: EmployeeController;
 
   constructor(port) {
     this.io = new Server(port);
     this.authService = new AuthService();
-    this.roleService = new UserRoleService();
     this.adminController = new AdminController();
     this.chefController = new ChefController();
+    this.employeeController = new EmployeeController();
     console.log("Server is running on port:", port, "\n Waiting for connections...");
     this.io.on("connection", (socket: Socket) => this.handleConnection(socket));
   }
@@ -27,7 +29,7 @@ class CafeteriaManagementServer {
   private handleConnection(socket: Socket) {
     console.log('A client is now connected with id :', socket.id);
 
-    socket.on("Authenticate", async (userCreds: any) => {
+    socket.on("authenticate", async (userCreds: any) => {
       console.log("\nReceived from client:", userCreds);
       await this.handleLogin(socket, userCreds);
     });
@@ -39,48 +41,53 @@ class CafeteriaManagementServer {
 
   private async handleLogin(socket: Socket, userCreds: any) {
     try {
-      const loginUser = await this.authService.validateUser(
+      const user = await this.authService.validateUser(
         userCreds.email,
         userCreds.password
       );
-      if (!loginUser) {
-        socket.emit("login", null); 
-      } else {
-        const userRole = await this.roleService.getById(loginUser.roleId);
-        socket.emit("login", {name: loginUser.name, role: userRole.roleName});
-        this.handleUserOptions(socket, userRole.roleName);
+      if(user){
+        socket.emit("login", {name: user.name, role: user.role, id:user.id});
+        this.handleUserOptions(socket);
       }
     } catch (error) {
       console.log("Error during login:", error);
-      socket.emit("login", null);
+      socket.emit("login", {error: error.message});
     }
   }
 
-  private handleUserOptions(socket: Socket, role: string) {
-    socket.on("user-options", async (response: any) => {
-      console.log("Received from client:", response);
-      const role = response.role;
-      const payload = response.payload;
-      
-      switch(role) {
-        case 'Admin':
-          socket.emit("option-response", { selectedOption: payload.selectedOption, response: await this.adminController.handleRequest(payload)});
-          break;
-        case 'Chef':
-          socket.emit("option-response", { selectedOption: payload.selectedOption, response: await this.chefController.handleRequest(payload)});
-          break;
-        case 'Employee':
-          socket.emit("option-response", {role: role, selectedOption: payload.selectedOption, response: "Customer here"});
-          break;
+  private handleUserOptions(socket: Socket) {
+    socket.on("request", async (request: any) => {
+      console.log("Received from client:", request);
+      const role = request.user.role;
+      const payload = {user: request.user, selectedOption: request.selectedOption, data: request.data};
+      let response: ResponseInterface = {user: request.user, selectedOption: request.selectedOption}
+      let result: ResponseInterface;
+      try{
+        switch(role) {
+          case 'Admin':
+            result = await this.adminController.handleRequest(payload)
+            break;
+          case 'Chef':
+            result = await this.chefController.handleRequest(payload)
+            break;
+          case 'employee':
+            result = await this.employeeController.handleRequest(payload)
+            break;
+        }
+        socket.emit("response", {...result, ...response});
       }
+      catch(error) {
+        console.log(error.message);
+        socket.emit("response", {user: request.user, data: error.message, dataType: 'message', event: 'error'})
+      }
+      
 
     });
 
     socket.on("feedback/getRolledoutItems", async (message: any) => {
       console.log("Received from client:", message);
-      // const rolledoutItems = await this.chefController.getRolledoutItems();
-      // socket.emit("feedback/rolledoutItems", rolledoutItems);
-    });
+      socket.emit("feedback/rolledoutItems", 'Ssup bitch');
+    })
 
 
 

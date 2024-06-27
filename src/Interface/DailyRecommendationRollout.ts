@@ -3,7 +3,7 @@ export interface DailyRecommendationRollout {
     item_id: number;
     votes?: number; 
     isSelected?: number; 
-    date?: Date; 
+    date?: string; 
     category_id: number;
   }
   
