@@ -1,18 +1,24 @@
 import { FeedBackRepository } from "../Repository/feedback";
 import SentimentAnalyzer from "../utils/sentimentAnalyzer";
+import { DailyRecommendationRolloutService } from "./dailyRecommendationRollout";
 import { MenuItemService } from "./menuItem";
 
 export class FeedbackService {
   private feedbackRepository = new FeedBackRepository();
   private menuItemService = new MenuItemService();
   private sentimentAnalyzer = new SentimentAnalyzer();
+  private dailyRecommendationRolloutService = new DailyRecommendationRolloutService();
 
   
   async addFeedback(user_id: number, itemId: number, rating: number, comment: string): Promise<string> {
 
     try {
-      const checkFeedbackExists = await this.checkFeedbackExists(itemId, user_id);
-      if(checkFeedbackExists) {
+      const isPresentInSelectedMenu = await this.isItemPresentInSelectedMenu(itemId);
+      if(!isPresentInSelectedMenu) {
+        throw new Error('[WARNING!]Entered item was not present in yesterday\'s menu');
+      }
+      const feedbackExists = await this.checkFeedbackExists(itemId, user_id);
+      if(feedbackExists) {
         throw new Error('[WARNING!]Feedback for this item already exists for this user!');
       }
       const date = new Date();
@@ -48,6 +54,16 @@ export class FeedbackService {
         return feedbackExists ? true : false;
       }
       return false;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async isItemPresentInSelectedMenu(itemId: number): Promise<boolean> {
+    try {
+      const selectedMenu = await this.dailyRecommendationRolloutService.getSelectedMenuYesterdays();
+      const itemExists = selectedMenu.find((item) => item.item_id === itemId);
+      return itemExists ? true : false;
     } catch (error) {
       throw error;
     }

@@ -1,12 +1,12 @@
 import { DailyRecommendationRollout } from "../Interface/DailyRecommendationRollout";
 import { DailyRecommendationRolloutRepository } from "../Repository/dailyRecommendationRollout";
-import { MenuItemRepository } from "../Repository/menuItem";
 import { UserVotesRepository } from "../Repository/userVotes";
-import { MenuItemService } from "./menuItem";
+import { NotificationService } from "./notification";
 
 export class DailyRecommendationRolloutService {
   private dailyRecommendationRolloutRepository = new DailyRecommendationRolloutRepository();
   private userVotesRepository = new UserVotesRepository();
+  private notficatonService = new NotificationService();
 
     async add(
         breakfastItems: string[],
@@ -33,6 +33,7 @@ export class DailyRecommendationRolloutService {
               };
       
               await this.dailyRecommendationRolloutRepository.create(item);
+              await this.notficatonService.addNotification(`Today's Recommended Menu Has Been Rolled Out \n You can vote for the items !`, 'employee')
             }
           }
       
@@ -83,6 +84,30 @@ export class DailyRecommendationRolloutService {
         }
         
 
+    }
+
+    async finalizeMenu(breakfast: string, lunch: string, dinner: string): Promise<string> {
+        const date = new Date().toISOString().split('T')[0];
+        const selectedMenu = await this.dailyRecommendationRolloutRepository.getSelectedMenuItems(date);
+        if(selectedMenu.length) {
+          throw new Error('[ Warning !! ] Menu already finalized for today!');
+        }
+        const lunchItems = lunch.split(',');
+        const dinnerItems = dinner.split(',');
+        const itemsExistsInMenu = await this.checkItemsExistsInMenu([breakfast, ...lunchItems, ...dinnerItems]);
+        if(!itemsExistsInMenu) {
+          throw new Error('[ Warning !! ] Item provided doesn\'t exist in today\'s recommended rollout');
+        }
+        const itemIds = [parseInt(breakfast), ...lunchItems.map(item => parseInt(item)), ...dinnerItems.map(item => parseInt(item))];
+        await this.dailyRecommendationRolloutRepository.updateSelectedMenuItems(date, itemIds);
+        await this.notficatonService.addNotification(`Today's Menu Has Been Finalized \n You can view the menu items !`, 'employee');
+        return 'Menu Finalized Successfully!';
+    }
+
+    async checkItemsExistsInMenu(itemIds: string[]): Promise<boolean> {
+        const menuItems = await this.getTodays();
+        const itemIdsInMenu = menuItems.map(item => item.item_id);
+        return itemIds.every(item => itemIdsInMenu.includes(parseInt(item)));
     }
 
 

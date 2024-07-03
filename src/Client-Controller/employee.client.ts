@@ -15,13 +15,13 @@ class EmployeeClient {
   constructor() {
     this.singleIterationOptions = {
       options: [
-        'View Rolled Out Menu', 'Give Feedback', 'Vote for meals'
+        'View Rolled Out Menu', 'Give Feedback', 'Vote for meals', 'View Notifications'
       ],
       questions: {
         3: ['Enter item id for breakfast: ', 'Enter item id for lunch: ', 'Enter item id for dinner: '],
       },
     };
-    this.noQuestionsOptions = [1,2];
+    this.noQuestionsOptions = [1,2, 4];
 
     this.secondIterationOptions = {
       questions: {

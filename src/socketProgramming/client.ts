@@ -42,7 +42,7 @@ class CafeteriaManagementClient {
                 payload =  await this.adminClient.requestHandler(User);
                 break;
             case 'Chef':
-                payload =  await this.chefClient.requestHandler(User);
+                payload =  await this.chefClient.requestHandler(User,event,selectedOption);
                 break;
             case 'employee':
                 payload = await this.employeeClient.requestHandler(User,event,selectedOption);
@@ -91,7 +91,7 @@ class CafeteriaManagementClient {
                     break;
                 default: 'Invalid role'
             }
-            if(response.user.role === 'employee' && response.event === 'secondInteration') {
+            if(response.event === 'secondInteration') {
                 await this.handleRequest(user,response.event, response.selectedOption);
                 return;
             }

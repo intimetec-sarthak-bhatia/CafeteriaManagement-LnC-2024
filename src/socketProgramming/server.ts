@@ -77,7 +77,7 @@ class CafeteriaManagementServer {
         socket.emit("response", {...result, ...response});
       }
       catch(error) {
-        console.log(error.message);
+        console.log(error);
         socket.emit("response", {user: request.user, data: error.message, dataType: 'message', event: 'error'})
       }
       

@@ -10,11 +10,13 @@ class ChefClient {
     };
   };
   private noQuestionsOptions: number[];
+  private secondIterationOptions: {questions: {[key: number]: string[]}};
+
 
   constructor() {
     this.singleIterationOptions = {
       options: [
-        'View Top 5 Recommended Items', 'Rollout Menu', 'View Menu'
+        'View Top 5 Recommended Items', 'Rollout Menu', 'View Menu', 'Finalize Today\'s Menu', 'View Notifications'
       ],
       questions: {
         2: ['Enter Breakfast Option 1 : ', 'Enter Breakfast Option 2 : ', 'Enter Breakfast Option 3 : ',
@@ -23,14 +25,23 @@ class ChefClient {
         ],
       },
     };
-    this.noQuestionsOptions = [1, 3];
+
+    this.secondIterationOptions = {
+      questions: {
+        4: ['Enter Selected Item for breakfast: ', 'Enter Selected Items for lunch:', 'Enter Selected Items for dinner: ']
+      }
+    }
+    this.noQuestionsOptions = [1, 3, 4, 5];
   }
 
-  async requestHandler(user)  {
-      const selectedOption = await this.showOptions();
-      const reqPayload = await this.optionsHandler(selectedOption);
-      return reqPayload;
-  }
+  async requestHandler(user, event?: string, preSelectedOption?: number)  {
+    if(preSelectedOption && event) {
+      return await this.optionsHandler(preSelectedOption, true);
+    }
+    const selectedOption = await this.showOptions();
+    const reqPayload = await this.optionsHandler(selectedOption);
+    return reqPayload;
+}
 
   async responseHandler(response: ResponseInterface) {
 
@@ -50,12 +61,20 @@ class ChefClient {
     return parseInt(selectedOption);
   }
 
-  async optionsHandler(selectedOption) {
-    if (this.noQuestionsOptions.includes(selectedOption)) {
+  async optionsHandler(selectedOption, isPreSelected? : boolean) {
+
+    if(!isPreSelected && this.secondIterationOptions.questions.hasOwnProperty(selectedOption)) {
       return { selectedOption: selectedOption, data: null };
     }
 
-    const prompts = this.singleIterationOptions.questions[selectedOption];
+    if (this.noQuestionsOptions.includes(selectedOption) && !isPreSelected) {
+      return { selectedOption: selectedOption, data: null };
+    }
+
+    let prompts = this.singleIterationOptions.questions[selectedOption];
+    if(isPreSelected) {
+      prompts = this.secondIterationOptions.questions[selectedOption];
+    }
     let answers: { [key: string]: string | string[] } = {};
     for (let i = 0; i < prompts.length; i++) {
       const question = prompts[i];
@@ -65,6 +84,10 @@ class ChefClient {
         answer = await PromptUtils.promptMessage(question);
       }
       answers[`arg${i + 1}`] = answer;
+    }
+
+    if(isPreSelected) {
+      return { selectedOption: selectedOption + 100, data: answers };
     }
 
     if(selectedOption === 2) {

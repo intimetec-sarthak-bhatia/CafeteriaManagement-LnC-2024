@@ -4,10 +4,11 @@ export class FeedBackRepository {
 
   async getByItemId(itemId: number): Promise<any> {
     const connection = await pool.getConnection();
+    const date = new Date().toISOString().split('T')[0];
     try {
       const [rows] = await connection.query<any>(
-        'SELECT * FROM Feedback WHERE item_id = ?',
-        [itemId]
+        'SELECT * FROM Feedback WHERE item_id = ? AND date = ?',
+        [itemId, date]
       );
       return rows || null;
     } catch (error) {
