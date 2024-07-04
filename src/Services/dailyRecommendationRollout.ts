@@ -1,7 +1,9 @@
 import { DailyRecommendationRollout } from "../Interface/DailyRecommendationRollout";
 import { DailyRecommendationRolloutRepository } from "../Repository/dailyRecommendationRollout";
 import { UserVotesRepository } from "../Repository/userVotes";
+import { MealCategory } from "../enums/mealCategory.enum";
 import { NotificationService } from "./notification";
+
 
 export class DailyRecommendationRolloutService {
   private dailyRecommendationRolloutRepository = new DailyRecommendationRolloutRepository();
@@ -61,7 +63,7 @@ export class DailyRecommendationRolloutService {
             throw new Error('[WARNING !] Item provided doesn\'t exist in today\'s recommended rollout');
         }
         rolledOutMenu.forEach(async (item) => {
-            if((item.item_id === breakfastId && item.Category != 'breakfast' ) || (item.item_id === lunchId && item.Category != 'lunch' ) || (item.item_id === dinnerId && item.Category != 'dinner' )) {
+            if((item.item_id === breakfastId && item.Category != MealCategory.Breakfast ) || (item.item_id === lunchId && item.Category != MealCategory.Lunch ) || (item.item_id === dinnerId && item.Category != MealCategory.Dinner )) {
                 throw new Error(`[WARNING !] Item Id ${item.item_id} belongs to ${item.Category} category`);
             }
         });

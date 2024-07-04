@@ -1,11 +1,13 @@
 import { Socket, io } from 'socket.io-client';
 import PromptUtils from '../utils/PromptUtils';
-import GetOptions from '../utils/GetOptions';
 import * as dotenv from 'dotenv';
 import AdminClient from '../Client-Controller/admin.client';
 import { RequestInterface } from '../Interface/request';
 import ChefClient from '../Client-Controller/chef.client';
 import EmployeeClient from '../Client-Controller/employee.client';
+import { UserRole } from '../enums/userRoles.enum';
+import { SocketEvent } from '../enums/socketEvent.enum';
+import { User } from '../Interface/User';
 
 dotenv.config();
 
@@ -27,43 +29,43 @@ class CafeteriaManagementClient {
 
 
     protected initializeConnection() {
-        this.socket.on('connect', () => {
+        this.socket.on(SocketEvent.CLIENT_CONNECT, () => {
             console.log('Welcome to Cafeteria Management! \nPlease enter user credentials to login: ');
             this.getUserCreds();
         });
-        this.socket.on('disconnect', this.disconnect);
+        this.socket.on(SocketEvent.DISCONNECT, this.disconnect);
         this.checkLoginStatus();
     }
 
-    protected async handleRequest(User, event?: string, selectedOption?: number) {
+    protected async handleRequest(User: User, event?: string, selectedOption?: number) {
         let payload: RequestInterface = {};
         switch (User.role) {
-            case 'Admin':
+            case UserRole.Admin:
                 payload =  await this.adminClient.requestHandler(User);
                 break;
-            case 'Chef':
+            case UserRole.Chef:
                 payload =  await this.chefClient.requestHandler(User,event,selectedOption);
                 break;
-            case 'employee':
+            case UserRole.Employee:
                 payload = await this.employeeClient.requestHandler(User,event,selectedOption);
                 break;
         }
         payload.user = {id: User.id, role: User.role};
-        this.socket.emit('request',payload);
+        this.socket.emit(SocketEvent.REQUEST,payload);
     }
 
     async getUserCreds() {
         try {
             const email = await PromptUtils.promptMessage('Enter email: ');
             const password = await PromptUtils.promptMessage('Enter password: ');
-            this.socket.emit('authenticate', { email, password });
+            this.socket.emit(SocketEvent.AUTHETICATION, { email, password });
         } catch (err) {
             console.error('Error getting user credentials:', err);
         }
     }
 
     checkLoginStatus() {
-        this.socket.on('login', async(loginUser: any) => {
+        this.socket.on(SocketEvent.LOGIN, async(loginUser: any) => {
             if (loginUser.error) {
                 console.log('Error:', loginUser.error + '\nPlease try again');
                 this.getUserCreds();
@@ -78,15 +80,15 @@ class CafeteriaManagementClient {
     }
 
     async handleResponse(user) {
-        this.socket.on('response', async (response: any) => {
+        this.socket.on(SocketEvent.RESPONSE, async (response: any) => {
             switch(user.role) {
-                case 'Admin':
+                case UserRole.Admin:
                     await this.adminClient.responseHandler(response);
                     break;
-                case 'Chef':
+                case UserRole.Chef:
                     await this.chefClient.responseHandler(response);
                     break;
-                case 'employee':
+                case UserRole.Employee:
                     await this.employeeClient.responseHandler(response);
                     break;
                 default: 'Invalid role'
