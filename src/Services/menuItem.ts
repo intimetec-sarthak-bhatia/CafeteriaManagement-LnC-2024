@@ -2,6 +2,7 @@ import { MealTypeRepository } from "../Repository/mealType";
 import { MenuItemRepository } from "../Repository/menuItem";
 import { MenuItem } from "../Interface/MenuItem";
 import { NotificationService } from "./notification";
+import { UserRole } from "../enums/userRoles.enum";
 
 export class MenuItemService {
   private menuRepository = new MenuItemRepository();
@@ -35,6 +36,7 @@ export class MenuItemService {
 
   async getTopMenuItems(amount: number = 5): Promise<any> {
     const menuItems = await this.menuRepository.getTopMenuItems(amount);
+    console.log('menuItems', menuItems);
 
     for (const item of menuItems) {
       const mealType = await this.mealTypeRepository.getMealTypeById(
@@ -54,7 +56,7 @@ export class MenuItemService {
   async updatePrice(price: number, name: string): Promise<string> {
     try {
       await this.menuRepository.updatePrice(price, name);
-      await this.NotificationService.addNotification(`Price updated for ${name}, Updated Price: ${price}`, 'Chef')
+      await this.NotificationService.addNotification(`Price updated for ${name}, Updated Price: ${price}`, UserRole.Chef)
       return "Price updated successfully!";
     } catch (error) {
       throw error;

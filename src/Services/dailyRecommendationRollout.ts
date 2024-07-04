@@ -27,10 +27,10 @@ export class DailyRecommendationRolloutService {
           ];
       
           for (const { items, categoryId } of itemSplits) {
-            for (const item_id of items) {
+            for (const itemId of items) {
               const item: DailyRecommendationRollout = {
-                item_id: parseInt(item_id.trim()),
-                category_id: categoryId,
+                itemId: parseInt(itemId.trim()),
+                categoryId: categoryId,
                 date: new Date().toISOString().split('T')[0],
               };
       
@@ -54,32 +54,32 @@ export class DailyRecommendationRolloutService {
         return this.dailyRecommendationRolloutRepository.getSelectedMenuItems(yesterdayDate);
     }
 
-    async voteMeal(userID: number, breakfastId: number, lunchId: number, dinnerId: number) {
+    async voteMeal(userId: number, breakfastId: number, lunchId: number, dinnerId: number) {
         try {
           const date = new Date().toISOString().split('T')[0];
         const rolledOutMenu = await this.dailyRecommendationRolloutRepository.getDailyRecommendationRolloutByDate(date);
-        const itemIds = rolledOutMenu.map((item) => item.item_id);
+        const itemIds = rolledOutMenu.map((item) => item.itemId);
         if(!itemIds.includes(breakfastId) || !itemIds.includes(lunchId) || !itemIds.includes(dinnerId)) {
             throw new Error('[WARNING !] Item provided doesn\'t exist in today\'s recommended rollout');
         }
         rolledOutMenu.forEach(async (item) => {
-            if((item.item_id === breakfastId && item.Category != MealCategory.Breakfast ) || (item.item_id === lunchId && item.Category != MealCategory.Lunch ) || (item.item_id === dinnerId && item.Category != MealCategory.Dinner )) {
-                throw new Error(`[WARNING !] Item Id ${item.item_id} belongs to ${item.Category} category`);
+            if((item.itemId === breakfastId && item.Category != MealCategory.Breakfast ) || (item.itemId === lunchId && item.Category != MealCategory.Lunch ) || (item.itemId === dinnerId && item.Category != MealCategory.Dinner )) {
+                throw new Error(`[WARNING !] Item Id ${item.itemId} belongs to ${item.Category} category`);
             }
         });
-        const userVotesToday = await this.userVotesRepository.getVotesByDate(userID, date);
+        const userVotesToday = await this.userVotesRepository.getVotesByDate(userId, date);
         if(userVotesToday.length === 3){
             throw new Error('[WARNING !] You have already voted menu for today');
         }
         const votedRollOutMenu: number[] = [];
         rolledOutMenu.forEach(async (item) => {
-          if(item.item_id === breakfastId || item.item_id === lunchId || item.item_id === dinnerId) {
+          if(item.itemId === breakfastId || item.itemId === lunchId || item.itemId === dinnerId) {
             votedRollOutMenu.push(item.id);
-            await this.dailyRecommendationRolloutRepository.incrementVoteCount(item.item_id);
+            await this.dailyRecommendationRolloutRepository.incrementVoteCount(item.itemId);
 
           }
         });
-        const result = await this.userVotesRepository.addUserVote(userID, votedRollOutMenu, date);
+        const result = await this.userVotesRepository.addUserVote(userId, votedRollOutMenu, date);
         return result;
         } catch (error) {
           throw error;
@@ -108,7 +108,7 @@ export class DailyRecommendationRolloutService {
 
     async checkItemsExistsInMenu(itemIds: string[]): Promise<boolean> {
         const menuItems = await this.getTodays();
-        const itemIdsInMenu = menuItems.map(item => item.item_id);
+        const itemIdsInMenu = menuItems.map(item => item.itemId);
         return itemIds.every(item => itemIdsInMenu.includes(parseInt(item)));
     }
 

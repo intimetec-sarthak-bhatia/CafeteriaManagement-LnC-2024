@@ -3,9 +3,9 @@ export interface MenuItem {
     name: string;
     mealType: number;
     price: number;
-    last_prepared?: Date | null; 
-    times_prepared?: number; 
+    lastPrepared?: Date | null; 
+    timesPrepared?: number; 
     availability: number;
-    sentiment_score?: number | null; 
+    sentimentScore?: number | null; 
     category?: string;
 }

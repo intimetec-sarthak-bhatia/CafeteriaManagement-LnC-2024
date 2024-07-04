@@ -7,7 +7,7 @@ export class FeedBackRepository {
     const date = new Date().toISOString().split('T')[0];
     try {
       const [rows] = await connection.query<any>(
-        'SELECT * FROM Feedback WHERE item_id = ? AND date = ?',
+        'SELECT * FROM Feedback WHERE itemId = ? AND date = ?',
         [itemId, date]
       );
       return rows || null;
@@ -18,11 +18,11 @@ export class FeedBackRepository {
     }
 }
 
-  async addFeedback(userId, itemId: number, ratings: number, comment: string, date: string): Promise<string> {
+  async addFeedback(userId: number, itemId: number, ratings: number, comment: string, date: string): Promise<string> {
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.query(
-        'INSERT INTO Feedback (user_id, item_id, rating, comment, date) VALUES (?, ?, ?,?, ?)',
+        'INSERT INTO Feedback (userId, itemId, rating, comment, date) VALUES (?, ?, ?,?, ?)',
         [userId, itemId, ratings, comment, date]
       );
       return rows[0] || null;

@@ -1,9 +1,9 @@
 export interface DailyRecommendationRollout {
     id?: number; 
-    item_id: number;
+    itemId: number;
     votes?: number; 
     isSelected?: number; 
     date?: string; 
-    category_id: number;
+    categoryId: number;
   }
   

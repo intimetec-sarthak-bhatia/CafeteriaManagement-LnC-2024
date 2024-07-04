@@ -50,13 +50,13 @@ class EmployeeController {
         return {data: selectedMenu, dataType: 'table', event: 'secondInteration'};
     }
 
-    private async submitFeedback(user_id: number, item_id: string, ratings: string, comments: string): Promise<any> {
-        const result = await this.feedbackService.addFeedback(user_id,parseInt(item_id), parseFloat(ratings), comments);
+    private async submitFeedback(userId: number, itemId: string, ratings: string, comments: string): Promise<any> {
+        const result = await this.feedbackService.addFeedback(userId,parseInt(itemId), parseFloat(ratings), comments);
         return {data: result, dataType: 'message', event: 'feedbackSubmitted'};
     }
 
-    private async voteMeal(user_id, breakfastId: string, lunchId: string, dinnerId: string) {
-        const result = await this.dailyRecommendationService.voteMeal(user_id, parseInt(breakfastId), parseInt(lunchId), parseInt(dinnerId));
+    private async voteMeal(userId: number, breakfastId: string, lunchId: string, dinnerId: string) {
+        const result = await this.dailyRecommendationService.voteMeal(userId, parseInt(breakfastId), parseInt(lunchId), parseInt(dinnerId));
         return {data: result, dataType: 'message', event: 'mealVoted'};
     }
 

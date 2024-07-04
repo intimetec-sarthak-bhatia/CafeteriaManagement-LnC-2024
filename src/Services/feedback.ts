@@ -1,3 +1,4 @@
+import { MenuItem } from "../Interface/MenuItem";
 import { FeedBackRepository } from "../Repository/feedback";
 import SentimentAnalyzer from "../utils/sentimentAnalyzer";
 import { DailyRecommendationRolloutService } from "./dailyRecommendationRollout";
@@ -10,20 +11,20 @@ export class FeedbackService {
   private dailyRecommendationRolloutService = new DailyRecommendationRolloutService();
 
   
-  async addFeedback(user_id: number, itemId: number, rating: number, comment: string): Promise<string> {
+  async addFeedback(userId: number, itemId: number, rating: number, comment: string): Promise<string> {
 
     try {
       const isPresentInSelectedMenu = await this.isItemPresentInSelectedMenu(itemId);
       if(!isPresentInSelectedMenu) {
         throw new Error('[WARNING!]Entered item was not present in yesterday\'s menu');
       }
-      const feedbackExists = await this.checkFeedbackExists(itemId, user_id);
+      const feedbackExists = await this.checkFeedbackExists(itemId, userId);
       if(feedbackExists) {
         throw new Error('[WARNING!]Feedback for this item already exists for this user!');
       }
       const date = new Date();
       const formattedDate = date.toISOString().split('T')[0]
-      const result = await this.feedbackRepository.addFeedback(user_id, itemId, rating, comment,formattedDate );
+      const result = await this.feedbackRepository.addFeedback(userId, itemId, rating, comment,formattedDate );
       if(result) {
         await this.updateSentimentScore(itemId, comment);
       }
@@ -36,8 +37,8 @@ export class FeedbackService {
 
   async updateSentimentScore(itemId: number, comment: string): Promise<void> {
     try {
-      const item = await this.menuItemService.getMenuItemById(itemId);
-      const avgSentimentScore = item.sentiment_score;
+      const item: MenuItem = await this.menuItemService.getMenuItemById(itemId);
+      const avgSentimentScore = item.sentimentScore;
       const feedbackSentimentScore = await this.sentimentAnalyzer.analyzeSentiment(comment);
       const updatedSentimentScore = !avgSentimentScore ? feedbackSentimentScore : (avgSentimentScore + feedbackSentimentScore) / 2;
       await this.menuItemService.updateSentimentScore(updatedSentimentScore, itemId);
@@ -50,7 +51,7 @@ export class FeedbackService {
     try {
       const result = await this.feedbackRepository.getByItemId(itemId);
       if(result.length) {
-        const feedbackExists = result.find((feedback) => feedback.user_id === userId);
+        const feedbackExists = result.find((feedback) => feedback.userId === userId);
         return feedbackExists ? true : false;
       }
       return false;
@@ -62,7 +63,7 @@ export class FeedbackService {
   async isItemPresentInSelectedMenu(itemId: number): Promise<boolean> {
     try {
       const selectedMenu = await this.dailyRecommendationRolloutService.getSelectedMenuYesterdays();
-      const itemExists = selectedMenu.find((item) => item.item_id === itemId);
+      const itemExists = selectedMenu.find((item) => item.itemId === itemId);
       return itemExists ? true : false;
     } catch (error) {
       throw error;

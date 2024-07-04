@@ -36,7 +36,7 @@ export class UserRepository {
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.query<any>(
-        'SELECT user.id, user.email, user.name, user.password, user_role.roleName as role FROM user JOIN user_role ON user.roleId = user_role.id WHERE user.email = ?',
+        'SELECT user.id, user.email, user.name, user.password, userRole.roleName as role FROM user JOIN userRole ON user.roleId = userRole.id WHERE user.email = ?',
         [email]
       );
       return rows[0];

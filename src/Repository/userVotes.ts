@@ -3,13 +3,13 @@ import pool from "../database";
 export class UserVotesRepository {
 
 
-  async addUserVote(user_id: number, menuRollOutId: number[], date: string): Promise<string> {
+  async addUserVote(userId: number, menuRollOutId: number[], date: string): Promise<string> {
     const connection = await pool.getConnection();
     try {
         menuRollOutId.forEach(async (id) => {
             await connection.query(
                 'INSERT INTO UserVotes (userId, menuRollOutId, date) VALUES (?, ?, ?)',
-                [user_id, id, date]
+                [userId, id, date]
             );
         });
         return 'Votes added successfully!';

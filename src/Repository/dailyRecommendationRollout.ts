@@ -5,11 +5,11 @@ export class DailyRecommendationRolloutRepository {
 
   async create(DailyRecommendationRollout: DailyRecommendationRollout): Promise<string> {
     const connection = await pool.getConnection();
-    const { item_id, date, category_id } = DailyRecommendationRollout;
+    const { itemId, date, categoryId } = DailyRecommendationRollout;
     try {
       const [rows] = await connection.query(
-        'INSERT INTO DailyRecommendationRollout (item_id, date, category_id) VALUES (?, ?, ?)',
-        [item_id, date, category_id]
+        'INSERT INTO DailyRecommendationRollout (itemId, date, categoryId) VALUES (?, ?, ?)',
+        [itemId, date, categoryId]
       );
       return rows[0]?.type || null;
     } catch (error) {
@@ -23,7 +23,7 @@ export class DailyRecommendationRolloutRepository {
         const connection = await pool.getConnection();
         try {
             const [rows] = await connection.query<any>(
-                'SELECT dr.item_id,dr.votes, mi.name AS Item, c.category AS Category, mi.sentiment_score AS "Sentiment Score" FROM DailyRecommendationRollout dr JOIN MenuItem mi ON dr.item_id = mi.id JOIN Category c ON dr.category_id = c.id WHERE  dr.date = ?',
+                'SELECT dr.itemId,dr.votes, mi.name AS Item, c.category AS Category, mi.sentimentScore AS "Sentiment Score" FROM DailyRecommendationRollout dr JOIN MenuItem mi ON dr.itemId = mi.id JOIN Category c ON dr.categoryId = c.id WHERE  dr.date = ?',
                 [date]
             );
             return rows;
@@ -49,13 +49,13 @@ export class DailyRecommendationRolloutRepository {
         }
     }
 
-    async updateSelectedMenuItems(date: string, item_ids: number[]): Promise<string> {
+    async updateSelectedMenuItems(date: string, itemIds: number[]): Promise<string> {
         const connection = await pool.getConnection();
         try {
-            for (const item_id of item_ids) {
+            for (const itemId of itemIds) {
                 await connection.query(
-                    'UPDATE DailyRecommendationRollout SET isSelected = 1 WHERE date = ? AND item_id = ?',
-                    [date, item_id]
+                    'UPDATE DailyRecommendationRollout SET isSelected = 1 WHERE date = ? AND itemId = ?',
+                    [date, itemId]
                 );
             }
             return 'Selected menu updated successfully!';
@@ -66,13 +66,13 @@ export class DailyRecommendationRolloutRepository {
         }
     }
 
-    async incrementVoteCount(item_id: number): Promise<string> {
+    async incrementVoteCount(itemId: number): Promise<string> {
         const connection = await pool.getConnection();
         try {
             const date = new Date().toISOString().split('T')[0];
             await connection.query(
-                'UPDATE DailyRecommendationRollout SET votes = votes + 1 WHERE item_id = ? AND date = ?',
-                [item_id, date]
+                'UPDATE DailyRecommendationRollout SET votes = votes + 1 WHERE itemId = ? AND date = ?',
+                [itemId, date]
             );
             return 'Vote count updated successfully!';
         } catch (error) {

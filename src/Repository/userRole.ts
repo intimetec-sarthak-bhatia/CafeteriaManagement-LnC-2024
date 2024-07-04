@@ -6,7 +6,7 @@ export class UserRoleRepository {
     const connection = await pool.getConnection();
     try {
       const [result] = await connection.query<any>(
-        'INSERT INTO user_role (roleName) VALUES (?)',
+        'INSERT INTO userRole (roleName) VALUES (?)',
         [roleName]
       );
       return result.insertId;
@@ -19,7 +19,7 @@ export class UserRoleRepository {
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.query<any>(
-        'SELECT id, roleName FROM user_role'
+        'SELECT id, roleName FROM userRole'
       );
       return rows;
     } finally {
@@ -31,7 +31,7 @@ export class UserRoleRepository {
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.query<any>(
-        'SELECT id, roleName FROM user_role WHERE id = ?',
+        'SELECT id, roleName FROM userRole WHERE id = ?',
         [id]
       );
       return rows[0];

@@ -69,7 +69,7 @@ class CafeteriaManagementServer {
           case UserRole.Admin:
             result = await this.adminController.handleRequest(payload)
             break;
-          case UserRole.Admin:
+          case UserRole.Chef:
             result = await this.chefController.handleRequest(payload)
             break;
           case UserRole.Employee:
