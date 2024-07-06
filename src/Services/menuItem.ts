@@ -2,7 +2,7 @@ import { MealTypeRepository } from "../Repository/mealType";
 import { MenuItemRepository } from "../Repository/menuItem";
 import { MenuItem } from "../Interface/MenuItem";
 import { NotificationService } from "./notification";
-import { UserRole } from "../enums/userRoles.enum";
+import { UserRole } from "../Enums/userRoles.enum";
 
 export class MenuItemService {
   private menuRepository = new MenuItemRepository();
@@ -36,21 +36,8 @@ export class MenuItemService {
 
   async getTopMenuItems(amount: number = 5): Promise<any> {
     const menuItems = await this.menuRepository.getTopMenuItems(amount);
-    console.log('menuItems', menuItems);
-
-    for (const item of menuItems) {
-      const mealType = await this.mealTypeRepository.getMealTypeById(
-        item.mealType
-      );
-      delete item.mealType;
-      if (mealType === "breakfast") {
-        item.category = "breakfast";
-      } else {
-        item.category = "lunch/dinner";
-      }
-    }
-
-    return menuItems;
+    const menuItemsByCategory = await this.groupByCategory(menuItems);
+    return menuItemsByCategory;
   }
 
   async updatePrice(price: number, name: string): Promise<string> {
@@ -88,5 +75,20 @@ export class MenuItemService {
   async getMenuItemById(id: number): Promise<MenuItem> {
     const result = await this.menuRepository.getMenuItemById(id);
     return result;
+  }
+
+  async groupByCategory(menuItems): Promise<any> {
+    for (const item of menuItems) {
+      const mealType = await this.mealTypeRepository.getMealTypeById(
+        item.mealType
+      );
+      delete item.mealType;
+      if (mealType === "breakfast") {
+        item.category = "breakfast";
+      } else {
+        item.category = "lunch/dinner";
+      }
+    }
+    return menuItems;
   }
 }

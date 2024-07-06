@@ -86,10 +86,11 @@ export class MenuItemRepository {
     async updatePrice(price: number, name: string): Promise<void> {
         const connection = await pool.getConnection();
         try {
-            await connection.query<any>(
+            const [rows] = await connection.query<any>(
                 'UPDATE MenuItem SET price = ? WHERE name = ?',
                 [price, name]
             );
+            return rows[0];
         } catch (error) {
             throw error;
         } finally {
@@ -100,10 +101,11 @@ export class MenuItemRepository {
     async updateAvailability(availability: number, name: string): Promise<void> {
         const connection = await pool.getConnection();
         try {
-            await connection.query<any>(
+            const [rows] = await connection.query<any>(
                 'UPDATE MenuItem SET availability = ? WHERE name = ?',
                 [availability, name]
             );
+            return rows[0];
         } catch (error) {
             throw error;
         } finally {
@@ -114,10 +116,12 @@ export class MenuItemRepository {
     async updateSentimentScore(score: number, itemId: number): Promise<void> {
         const connection = await pool.getConnection();
         try {
-            await connection.query<any>(
+            const [rows] = await connection.query<any>(
                 'UPDATE MenuItem SET sentimentScore = ? WHERE id = ?',
                 [score, itemId]
             );
+            return rows[0];
+            
         } catch (error) {
             throw error;
         } finally {

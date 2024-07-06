@@ -1,13 +1,13 @@
 import { Socket, io } from 'socket.io-client';
 import PromptUtils from '../utils/PromptUtils';
 import * as dotenv from 'dotenv';
-import AdminClient from '../Client-Controller/admin.client';
-import { RequestInterface } from '../Interface/request';
-import ChefClient from '../Client-Controller/chef.client';
-import EmployeeClient from '../Client-Controller/employee.client';
-import { UserRole } from '../enums/userRoles.enum';
-import { SocketEvent } from '../enums/socketEvent.enum';
+import AdminClient from '../ClientController/admin.client';
+import ChefClient from '../ClientController/chef.client';
+import EmployeeClient from '../ClientController/employee.client';
+import { UserRole } from '../Enums/userRoles.enum';
+import { SocketEvent } from '../Enums/socketEvent.enum';
 import { User } from '../Interface/User';
+import { RequestInterface } from '../Interface/Request';
 
 dotenv.config();
 

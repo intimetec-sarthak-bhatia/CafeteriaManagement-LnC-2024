@@ -1,21 +1,21 @@
 // auth.service.ts
-import { User } from '../Interface/User';
-import { UserService } from './user';
+import { User } from "../Interface/User";
+import { UserService } from "./user";
 
 class AuthService {
-    private userService: UserService;
+  private userService: UserService;
 
-    constructor() {
-        this.userService = new UserService();
-    }
+  constructor() {
+    this.userService = new UserService();
+  }
 
-    async validateUser(email: string, password: string): Promise<User | null> {
-            const user = await this.userService.getUserByEmail(email);
-            if (user && user.password === password) {
-                return user;
-            }
-            throw new Error('Invalid Credentials!');
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.userService.getUserByEmail(email);
+    if (user && user.password === password) {
+      return user;
     }
+    throw new Error("Invalid Credentials!");
+  }
 }
 
 export default AuthService;

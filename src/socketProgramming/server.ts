@@ -1,13 +1,12 @@
 import { Server, Socket } from "socket.io";
 import AuthService from "../Services/authentication";
-import { UserRoleService } from "../Services/userRole";
 import * as dotenv from 'dotenv';
-import AdminController from "../Server-Controller/admin.server";
-import ChefController from "../Server-Controller/chef.server";
-import { ResponseInterface } from "../Interface/response";
-import EmployeeController from "../Server-Controller/employee.server";
-import { UserRole } from "../enums/userRoles.enum";
-import { SocketEvent } from "../enums/socketEvent.enum";
+import AdminController from "../ServerController/admin.server";
+import ChefController from "../ServerController/chef.server";
+import EmployeeController from "../ServerController/employee.server";
+import { UserRole } from "../Enums/userRoles.enum";
+import { SocketEvent } from "../Enums/socketEvent.enum";
+import { ResponseInterface } from "../Interface/Response";
 
 dotenv.config();
 

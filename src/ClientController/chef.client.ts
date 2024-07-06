@@ -1,4 +1,4 @@
-import { ResponseInterface } from "../Interface/response";
+import { ResponseInterface } from "../Interface/Response";
 import PromptUtils from "../utils/PromptUtils";
 
 class ChefClient {
