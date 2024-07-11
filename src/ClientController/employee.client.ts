@@ -15,17 +15,18 @@ class EmployeeClient {
   constructor() {
     this.singleIterationOptions = {
       options: [
-        'View Rolled Out Menu', 'Give Feedback', 'Vote for meals', 'View Notifications'
+        'View Rolled Out Menu', 'Give Feedback', 'Vote for meals', 'View Notifications', 'Give feedback for discarded items'
       ],
       questions: {
-        3: ['Enter item id for breakfast: ', 'Enter item id for lunch: ', 'Enter item id for dinner: '],
+        3: ['Enter item id for breakfast: ', 'Enter item id for lunch: ', 'Enter item id for dinner: ']
       },
     };
-    this.noQuestionsOptions = [1,2, 4];
+    this.noQuestionsOptions = [1,2, 4,5];
 
     this.secondIterationOptions = {
       questions: {
-        2: ['Enter Item id to give feedback: ', 'Enter ratings:', 'Enter comments: ']
+        2: ['Enter Item id to give feedback: ', 'Enter ratings:', 'Enter comments: '],
+        5: ['What you did not like about the item: ', 'How would you like the food to be improved:', 'Share your moms recipe: '],
       }
     }
   }
@@ -56,6 +57,7 @@ class EmployeeClient {
       console.log(`${index + 1}. ${option}`);
     });
     const selectedOption = await PromptUtils.promptMessage("Enter your choice: ");
+    await this.verifySelectedOption(selectedOption, options);
     return parseInt(selectedOption);
   }
 
@@ -85,6 +87,19 @@ class EmployeeClient {
     }
 
     return { selectedOption: selectedOption, data: answers };
+  }
+
+  async verifySelectedOption(selectedOption: string, options: string[]) {
+    if (isNaN(parseInt(selectedOption)) || parseInt(selectedOption) < 1){
+      console.log("\n[Warning] Please enter correct data type:number\n");
+      await this.showOptions();
+      return;
+    }
+    if (parseInt(selectedOption) > options.length) {
+      console.log("\n[Warning] Please enter correct option\n");
+      await this.showOptions();
+      return;
+    }
   }
 
 }

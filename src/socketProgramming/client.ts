@@ -41,7 +41,7 @@ class CafeteriaManagementClient {
         let payload: RequestInterface = {};
         switch (User.role) {
             case UserRole.Admin:
-                payload =  await this.adminClient.requestHandler(User);
+                payload =  await this.adminClient.requestHandler();
                 break;
             case UserRole.Chef:
                 payload =  await this.chefClient.requestHandler(User,event,selectedOption);

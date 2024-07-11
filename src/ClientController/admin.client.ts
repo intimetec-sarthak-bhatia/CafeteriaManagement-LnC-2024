@@ -2,7 +2,6 @@ import { ResponseInterface } from "../Interface/Response";
 import PromptUtils from "../utils/PromptUtils";
 
 class AdminClient {
-
   private singleIterationOptions: {
     options: string[];
     questions: {
@@ -40,16 +39,15 @@ class AdminClient {
     this.noQuestionsOptions = [3];
   }
 
-  async requestHandler(user)  {
-      const selectedOption = await this.showOptions();
-      const reqPayload = await this.optionsHandler(selectedOption);
-      return reqPayload;
+  async requestHandler() {
+    const selectedOption = await this.showOptions();
+    const reqPayload = await this.optionsHandler(selectedOption);
+    return reqPayload;
   }
 
   async responseHandler(response: ResponseInterface) {
-
-    if(response.dataType === 'table') {
-        console.table(response.data);
+    if (response.dataType === "table") {
+      console.table(response.data);
     }
     console.log(response.data);
   }
@@ -60,7 +58,10 @@ class AdminClient {
     options.map((option: string, index: number) => {
       console.log(`${index + 1}. ${option}`);
     });
-    const selectedOption = await PromptUtils.promptMessage("Enter your choice: ");
+    const selectedOption = await PromptUtils.promptMessage(
+      "Enter your choice: "
+    );
+    await this.verifySelectedOption(selectedOption, options);
     return parseInt(selectedOption);
   }
 
@@ -78,6 +79,19 @@ class AdminClient {
     }
 
     return { selectedOption: selectedOption, data: answers };
+  }
+
+  async verifySelectedOption(selectedOption: string, options: string[]) {
+    if (isNaN(parseInt(selectedOption)) || parseInt(selectedOption) < 1) {
+      console.log("\n[Warning] Please enter correct data type:number\n");
+      await this.showOptions();
+      return;
+    }
+    if (parseInt(selectedOption) > options.length) {
+      console.log("\n[Warning] Please enter correct option\n");
+      await this.showOptions();
+      return;
+    }
   }
 }
 

@@ -21,7 +21,6 @@ export class NotificationRepository {
     }
 
     async viewByRole(date: string, role: string): Promise<Notification[]> {
-        console.log('date:', date, 'role:', role);
         const connection = await pool.getConnection();
         try {
             const [rows] = await connection.query<any>( `SELECT n.notification, n.date 

@@ -1,5 +1,6 @@
 import { DailyRecommendationRolloutService } from "../Services/dailyRecommendationRollout";
 import { FeedbackService } from "../Services/feedback";
+import { MenuItemService } from "../Services/menuItem";
 import { NotificationService } from "../Services/notification";
 
 class EmployeeController {
@@ -7,11 +8,13 @@ class EmployeeController {
     private dailyRecommendationService: DailyRecommendationRolloutService;
     private feedbackService: FeedbackService;
     private notificationService: NotificationService;
+    private menuItemService: MenuItemService;
 
     constructor() {
         this.dailyRecommendationService = new DailyRecommendationRolloutService();
         this.feedbackService = new FeedbackService();
         this.notificationService = new NotificationService();
+        this.menuItemService = new MenuItemService();
     }
     
     async handleRequest(payload) {
@@ -25,8 +28,12 @@ class EmployeeController {
                 return await this.voteMeal(payload.user.id, args.arg1, args.arg2, args.arg3);
             case 4: 
                 return await this.viewNotifications();
+            case 5:
+                return await this.viewDiscardedItems();
             case 102:
                 return await this.submitFeedback(payload.user.id,args.arg1, args.arg2, args.arg3);
+            case 105: 
+                return await this.submitDiscardedItemFeedback(payload.user.id, args.arg1, args.arg2, args.arg3);
             default:
                 return 'Invalid option';
         }
@@ -63,6 +70,16 @@ class EmployeeController {
     private async viewNotifications() {
         const notifications = await this.notificationService.viewNotifications('employee');
         return {data: notifications, dataType: 'table', event: 'viewNotifications'};
+    }
+
+    private async viewDiscardedItems() {
+        const discardedItems = await this.menuItemService.viewThisMonthsDiscardedItems();
+        return {data: discardedItems, dataType: 'table', event: 'secondInteration'};
+    }
+
+    private async submitDiscardedItemFeedback(userId: number, didNotLike: string, toImprove: string, momsRecipe: string) {
+        const result = await this.menuItemService.addDiscardedItemFeedback(userId, didNotLike, toImprove, momsRecipe);
+        return {data: result, dataType: 'message', event: 'feedbackSubmitted'};
     }
 
 }

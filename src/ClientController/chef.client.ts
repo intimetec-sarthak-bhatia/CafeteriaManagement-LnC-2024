@@ -16,7 +16,7 @@ class ChefClient {
   constructor() {
     this.singleIterationOptions = {
       options: [
-        'View Top 5 Recommended Items', 'Rollout Menu', 'View Menu', 'Finalize Today\'s Menu', 'View Notifications'
+        'View Top 5 Recommended Items', 'Rollout Menu', 'View Menu', 'Finalize Today\'s Menu', 'View Notifications', 'View Discard Menu Item List'
       ],
       questions: {
         2: ['Enter Breakfast Option 1 : ', 'Enter Breakfast Option 2 : ', 'Enter Breakfast Option 3 : ',
@@ -28,7 +28,8 @@ class ChefClient {
 
     this.secondIterationOptions = {
       questions: {
-        4: ['Enter Selected Item for breakfast: ', 'Enter Selected Items for lunch:', 'Enter Selected Items for dinner: ']
+        4: ['Enter Selected Item for breakfast: ', 'Enter Selected Items for lunch:', 'Enter Selected Items for dinner: '],
+        6: ['Enter Item Id to be discarded from Menu List: ']
       }
     }
     this.noQuestionsOptions = [1, 3, 4, 5];
@@ -58,6 +59,7 @@ class ChefClient {
       console.log(`${index + 1}. ${option}`);
     });
     const selectedOption = await PromptUtils.promptMessage("Enter your choice: ");
+    await this.verifySelectedOption(selectedOption, options);
     return parseInt(selectedOption);
   }
 
@@ -109,6 +111,19 @@ class ChefClient {
       answers.arg3.push(rollOutItems[`arg${k + 1}`]);
     }
     return answers;
+  }
+
+  async verifySelectedOption(selectedOption: string, options: string[]) {
+    if (isNaN(parseInt(selectedOption))) {
+      console.log("\n[Warning] Please enter correct data type:number\n");
+      await this.showOptions();
+      return;
+    }
+    if (parseInt(selectedOption) > options.length || parseInt(selectedOption) < 1){
+      console.log("\n[Warning] Please enter correct option\n");
+      await this.showOptions();
+      return;
+    }
   }
 }
 

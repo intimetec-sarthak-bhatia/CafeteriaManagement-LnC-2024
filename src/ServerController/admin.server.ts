@@ -1,7 +1,5 @@
 import { MenuItemService } from "../Services/menuItem";
 import { UserService } from "../Services/user";
-import { MenuItem } from "../Interface/MenuItem";
-import { ResponseInterface } from "../Interface/Response";
 
 class AdminController {
 
@@ -54,8 +52,8 @@ class AdminController {
         return {data: result, dataType: 'message', event: 'updatePrice'};
     }
 
-    private async updateAvailability( name: string, availability: string): Promise<any> {
-        const result = await this.menuItem.updateAvailability(parseInt(availability), name);
+    private async updateAvailability( id: string, availability: string): Promise<any> {
+        const result = await this.menuItem.updateAvailability(parseInt(availability), parseInt(id));
         return {data: result, dataType: 'message', event: 'updateAvailability'};
     }
 }

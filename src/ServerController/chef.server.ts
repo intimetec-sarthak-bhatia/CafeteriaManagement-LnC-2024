@@ -27,8 +27,12 @@ class ChefController {
                 return await this.viewUserVotes();
             case 5:
                 return await this.viewNotifications();
+            case 6: 
+                return await this.getDiscardMenuItems();
             case 104:
                 return await this.finalizeMenu(args.arg1, args.arg2, args.arg3);
+            case 106: 
+                return await this.discardMenuItem(args.arg1);
             default:
                 return 'Invalid option';
         }
@@ -65,6 +69,16 @@ class ChefController {
     private async viewNotifications() {
         const notifications = await this.notificationService.viewNotifications('Chef');
         return {data: notifications, dataType: 'table', event: 'viewNotifications'};
+    }
+
+    private async getDiscardMenuItems() {
+        const discardMenuItems = await this.menuItemService.getSuggestedDiscardItems();
+        return {data: discardMenuItems, dataType: 'table', event: 'secondInteration'};
+    }
+
+    private async discardMenuItem(itemId: number) {
+        const result = await this.menuItemService.addDiscardItem(itemId);
+        return {data: result, dataType: 'message', event: 'discardMenuItem'};
     }
 
 }
