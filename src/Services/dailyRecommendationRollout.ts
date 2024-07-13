@@ -11,9 +11,9 @@ export class DailyRecommendationRolloutService {
   private notficatonService = new NotificationService();
 
   async add(
-    breakfastItems: string[],
-    lunchItems: string[],
-    dinnerItems: string[]
+    breakfastItems: number[],
+    lunchItems: number[],
+    dinnerItems: number[]
   ): Promise<string> {
     const todaysRecommendations = await this.getTodays();
 
@@ -29,7 +29,7 @@ export class DailyRecommendationRolloutService {
     for (const { items, categoryId } of itemSplits) {
       for (const itemId of items) {
         const item: DailyRecommendationRollout = {
-          itemId: parseInt(itemId.trim()),
+          itemId: itemId,
           categoryId: categoryId,
           date: new Date().toISOString().split("T")[0],
         };
@@ -76,6 +76,9 @@ export class DailyRecommendationRolloutService {
         await this.dailyRecommendationRolloutRepository.getDailyRecommendationRolloutByDate(
           date
         );
+      if(rolledOutMenu.length === 0) {
+        throw new Error("[WARNING !] No menu items rolled out for today");
+      }
       const itemIds = rolledOutMenu.map((item) => item.itemId);
       if (
         !itemIds.includes(breakfastId) ||
@@ -109,9 +112,9 @@ export class DailyRecommendationRolloutService {
   }
 
   async finalizeMenu(
-    breakfast: string,
-    lunch: string,
-    dinner: string
+    breakfast: number,
+    lunch: number[],
+    dinner: number[]
   ): Promise<string> {
     const date = new Date().toISOString().split("T")[0];
     const selectedMenu =
@@ -121,26 +124,21 @@ export class DailyRecommendationRolloutService {
     if (selectedMenu.length) {
       throw new Error("[ Warning !! ] Menu already finalized for today!");
     }
-    const lunchItems = lunch.split(",");
-    const dinnerItems = dinner.split(",");
+    // const lunchItems = lunch.split(",");
+    // const dinnerItems = dinner.split(",");
     const itemsExistsInMenu = await this.checkItemsExistsInMenu([
       breakfast,
-      ...lunchItems,
-      ...dinnerItems,
+      ...lunch,
+      ...dinner,
     ]);
     if (!itemsExistsInMenu) {
       throw new Error(
         "[ Warning !! ] Item provided doesn't exist in today's recommended rollout"
       );
     }
-    const itemIds = [
-      parseInt(breakfast),
-      ...lunchItems.map((item) => parseInt(item)),
-      ...dinnerItems.map((item) => parseInt(item)),
-    ];
     await this.dailyRecommendationRolloutRepository.updateSelectedMenuItems(
       date,
-      itemIds
+      [breakfast, ...lunch, ...dinner]
     );
     await this.notficatonService.addNotification(
       `Today's Menu Has Been Finalized \n You can view the menu items !`,
@@ -149,10 +147,10 @@ export class DailyRecommendationRolloutService {
     return "Menu Finalized Successfully!";
   }
 
-  async checkItemsExistsInMenu(itemIds: string[]): Promise<boolean> {
+  async checkItemsExistsInMenu(itemIds: number[]): Promise<boolean> {
     const menuItems = await this.getTodays();
     const itemIdsInMenu = menuItems.map((item) => item.itemId);
-    return itemIds.every((item) => itemIdsInMenu.includes(parseInt(item)));
+    return itemIds.every((item) => itemIdsInMenu.includes(item));
   }
 
   async checkItemCategory(rolledOutMenu, breakfastId, lunchId, dinnerId) {

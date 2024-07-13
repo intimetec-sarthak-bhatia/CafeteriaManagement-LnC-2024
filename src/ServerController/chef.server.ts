@@ -45,7 +45,7 @@ class ChefController {
         return {data: recommendedItems, dataType: 'table', event: 'viewTopMenuItems'};
     }
 
-    private async rolloutDailyRecommendations(breakfastItems: string[], lunch: string[], dinner: string[]): Promise<any> {
+    private async rolloutDailyRecommendations(breakfastItems: number[], lunch: number[], dinner: number[]): Promise<any> {
         const result = await this.dailyRecommendationService.add(breakfastItems, lunch, dinner);
         return {data: result, dataType: 'message', event: 'rolloutDailyRecommendations'};
     }
@@ -61,8 +61,8 @@ class ChefController {
         return {data: userVotes, dataType: 'table', event: 'secondInteration'};
     }
 
-    private async finalizeMenu(breakfastItems: string, lunch: string, dinner: string): Promise<any> {
-        const result = await this.dailyRecommendationService.finalizeMenu(breakfastItems, lunch, dinner);
+    private async finalizeMenu(breakfast: number, lunch: number[], dinner: number[]): Promise<any> {
+        const result = await this.dailyRecommendationService.finalizeMenu(breakfast, lunch, dinner);
         return {data: result, dataType: 'message', event: 'menuFinalized'};
     }
 

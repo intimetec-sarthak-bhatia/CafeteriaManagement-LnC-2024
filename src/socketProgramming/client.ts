@@ -29,12 +29,14 @@ class CafeteriaManagementClient {
 
 
     protected initializeConnection() {
-        this.socket.on(SocketEvent.CLIENT_CONNECT, () => {
-            console.log('Welcome to Cafeteria Management! \nPlease enter user credentials to login: ');
-            this.getUserCreds();
-        });
+        this.socket.on(SocketEvent.CLIENT_CONNECT, this.handleClientConnect);
         this.socket.on(SocketEvent.DISCONNECT, this.disconnect);
         this.checkLoginStatus();
+    }
+
+    private handleClientConnect = (): void => {
+        console.log('Welcome to Cafeteria Management! \nPlease enter user credentials to login: ');
+        this.getUserCreds();
     }
 
     protected async handleRequest(User: User, event?: string, selectedOption?: number) {
@@ -44,17 +46,21 @@ class CafeteriaManagementClient {
                 payload =  await this.adminClient.requestHandler();
                 break;
             case UserRole.Chef:
-                payload =  await this.chefClient.requestHandler(User,event,selectedOption);
+                payload =  await this.chefClient.requestHandler(event,selectedOption);
                 break;
             case UserRole.Employee:
-                payload = await this.employeeClient.requestHandler(User,event,selectedOption);
+                payload = await this.employeeClient.requestHandler(event,selectedOption);
                 break;
+        }
+        if(payload.data === 'logout') { 
+            this.disconnect();
+            return;
         }
         payload.user = {id: User.id, role: User.role};
         this.socket.emit(SocketEvent.REQUEST,payload);
     }
 
-    async getUserCreds() {
+    private async getUserCreds(): Promise<void> {
         try {
             const email = await PromptUtils.promptMessage('Enter email: ');
             const password = await PromptUtils.promptMessage('Enter password: ');
@@ -64,22 +70,23 @@ class CafeteriaManagementClient {
         }
     }
 
-    checkLoginStatus() {
-        this.socket.on(SocketEvent.LOGIN, async(loginUser: any) => {
-            if (loginUser.error) {
-                console.log('Error:', loginUser.error + '\nPlease try again');
-                this.getUserCreds();
-            } else {
-                console.log('Welcome !', loginUser);
-                console.log(`${loginUser.role} logged in successfully`);
-                await this.handleRequest(loginUser)
-                await this.handleResponse(loginUser);
-                
-            }
-        });
+    private checkLoginStatus(): void {
+        this.socket.on(SocketEvent.LOGIN, this.handleLoginStatus);
     }
 
-    async handleResponse(user) {
+    private handleLoginStatus = async (loginUser: any): Promise<void> => {
+        if (loginUser.error) {
+            console.log('Error:', loginUser.error + '\nPlease try again');
+            this.getUserCreds();
+        } else {
+            console.log('Welcome !', loginUser);
+            console.log(`${loginUser.role} logged in successfully`);
+            await this.handleRequest(loginUser);
+            await this.handleResponse(loginUser);
+        }
+    }
+
+    async handleResponse(user: User): Promise<void> {
         this.socket.on(SocketEvent.RESPONSE, async (response: any) => {
             switch(user.role) {
                 case UserRole.Admin:
@@ -93,24 +100,13 @@ class CafeteriaManagementClient {
                     break;
                 default: 'Invalid role'
             }
-            if(response.event === 'secondInteration') {
-                await this.handleRequest(user,response.event, response.selectedOption);
-                return;
-            }
-
-            console.log('\n Please select an option: \n 1. Main Menu \n 2. Logout');
-            const selectedOption = await PromptUtils.promptMessage('Enter option: ');
-            if(selectedOption === '1') {
-                this.handleRequest(user);
-            }
-            else {
-                this.disconnect();
-            }
+            response.event === 'secondInteration' ? await this.handleRequest(user,response.event, response.selectedOption) : await this.handleRequest(user);
+            return;
 
         });
     }
 
-    disconnect = (): void => {
+    private disconnect = (): void => {
         console.log("Server disconnected !! Bbyee");
         this.socket.close();
       };
