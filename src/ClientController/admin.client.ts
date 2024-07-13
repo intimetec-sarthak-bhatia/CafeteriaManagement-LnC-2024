@@ -1,4 +1,5 @@
-import { USER_OPTIONS, QUESTIONS, NO_QUESTIONS_OPTIONS } from "../Enums/userOptions.enum";
+import { get } from "http";
+import { USER_OPTIONS, QUESTIONS, NO_QUESTIONS_OPTIONS, NUM_TYPE_QUESTIONS } from "../Enums/userOptions.enum";
 import { ResponseInterface } from "../Interface/Response";
 import PromptUtils from "../utils/PromptUtils";
 
@@ -6,11 +7,13 @@ class AdminClient {
   private options: string[];
   private questions: { [key: number]: string[] };
   private noQuestionsOptions: number[];
+  private numTypeQuestions: {[selectedOption: number] : number[]};
 
   constructor(role: string) {
     this.options = USER_OPTIONS[role];
     this.questions = QUESTIONS[role];
     this.noQuestionsOptions = NO_QUESTIONS_OPTIONS[role];
+    this.numTypeQuestions = NUM_TYPE_QUESTIONS[role];
   }
 
   async requestHandler() {
@@ -45,18 +48,33 @@ class AdminClient {
       return { selectedOption: selectedOption, data: null };
     }
     const prompts = this.questions[selectedOption];
-    const answers = await this.collectAnswers(prompts);
+    const answers = await this.collectAnswers(prompts, selectedOption);
     return { selectedOption: selectedOption, data: answers };
   }
 
-  private async collectAnswers(prompts: string[]): Promise<{ [key: string]: string }> {
-    const answers: { [key: string]: string } = {};
+  private async collectAnswers(prompts: string[], selectedOption: number): Promise<{ [key: string]: number }> {
+    const answers: { [key: string]: number } = {};
     for (let i = 0; i < prompts.length; i++) {
       const question = prompts[i];
-      const answer = await PromptUtils.promptMessage(question);
+      const answer = await this.getValidAnswer(question, selectedOption, answers, i);
       answers[`arg${i + 1}`] = answer;
     }
     return answers;
+  }
+
+  private async getValidAnswer(question: string, selectedOption: number, answers: { [key: string]: number}, iteration: number): Promise<number> {
+    let answer: string;
+
+    while (true) {
+      answer = await PromptUtils.promptMessage(question);
+      if (this.numTypeQuestions[selectedOption].includes(iteration+1) && !(/^[0-9,.]*$/.test(answer))) {
+        console.log('\n[Warning] Please enter a valid number\n');
+        continue;
+      }
+      break;
+    }
+
+    return parseInt(answer);
   }
 
   async verifySelectedOption(selectedOption: string) {

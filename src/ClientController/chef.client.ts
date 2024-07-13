@@ -1,4 +1,4 @@
-import { NO_QUESTIONS_OPTIONS, QUESTIONS, USER_OPTIONS } from "../Enums/userOptions.enum";
+import { NO_QUESTIONS_OPTIONS, NUM_TYPE_QUESTIONS, QUESTIONS, USER_OPTIONS } from "../Enums/userOptions.enum";
 import { ResponseInterface } from "../Interface/Response";
 import PromptUtils from "../utils/PromptUtils";
 
@@ -6,11 +6,13 @@ class ChefClient {
   private options: string[];
   private questions: { [key: number]: string[] };
   private noQuestionsOptions: number[];
+  private numTypeQuestions: {[selectedOption: number] : number[]};
 
   constructor(role: string) {
     this.options = USER_OPTIONS[role];
     this.questions = QUESTIONS[role];
     this.noQuestionsOptions = NO_QUESTIONS_OPTIONS[role];
+    this.numTypeQuestions = NUM_TYPE_QUESTIONS[role];
   }
 
   async requestHandler(event?: string, preSelectedOption?: number) {
@@ -60,18 +62,18 @@ class ChefClient {
     const answers: { [key: string]: number } = {};
     for (let i = 0; i < prompts.length; i++) {
       const question = prompts[i];
-      const answer = await this.getValidAnswer(question, selectedOption, answers);
+      const answer = await this.getValidAnswer(question, selectedOption, answers, i);
       answers[`arg${i + 1}`] = answer;
     }
     return answers;
   }
 
-  private async getValidAnswer(question: string, selectedOption: number, answers: { [key: string]: number}): Promise<number> {
+  private async getValidAnswer(question: string, selectedOption: number, answers: { [key: string]: number}, iteration: number): Promise<number> {
     let answer: string;
 
     while (true) {
       answer = await PromptUtils.promptMessage(question);
-      if (!(/^\d+$/.test(answer))) {
+      if (this.numTypeQuestions[selectedOption].includes(iteration+1) && !(/^[0-9,.]*$/.test(answer))) {
         console.log('\n[Warning] Please enter a valid number\n');
         continue;
       }

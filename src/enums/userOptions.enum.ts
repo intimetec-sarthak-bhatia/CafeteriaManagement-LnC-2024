@@ -31,9 +31,9 @@ export const USER_OPTIONS = {
 export const QUESTIONS = {
   [UserRole.Admin]: {
     1: ["Enter Employee Name: ", "Enter Employee Email: ", "Enter Employee Password: ", "Enter Employee Role: "],
-    2: ["Enter Menu Item Name: ", "Enter Menu Item Price: ", "Enter Menu Item MealType: ", "Enter Item Availability: "],
+    2: ["Enter Menu Item Name: ", "Enter Menu Item Price: ", "Enter Menu Item MealType: ", "Enter Item Availability (0/1): "],
     4: ["Enter Menu Item Name: ", "Enter New Price: "],
-    5: ["Enter Menu Item Name: ", "Enter New Availability: "]
+    5: ["Enter Menu Item Name: ", "Enter New Availability(0/1): "]
   },
   [UserRole.Chef]: {
     2: [
@@ -56,3 +56,22 @@ export const NO_QUESTIONS_OPTIONS = {
   [UserRole.Chef]: [1, 3, 4, 5, 7],
   [UserRole.Employee]: [1, 2, 4, 5]
 };
+
+export const NUM_TYPE_QUESTIONS = {
+  [UserRole.Admin]: {
+    1: [4],
+    2: [2,3,4],
+    4: [2],
+    5: [2]
+  },
+  [UserRole.Chef]: {
+    2: [1,2,3,4,5,6,7,8,9],
+    4: [1,2,3],
+    6: [1]
+  },
+  [UserRole.Employee]: {
+    3: [1,2,3],
+    2: [1,2]
+  }
+};
+
