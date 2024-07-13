@@ -1,32 +1,16 @@
+import { NO_QUESTIONS_OPTIONS, QUESTIONS, USER_OPTIONS } from "../Enums/userOptions.enum";
 import { ResponseInterface } from "../Interface/Response";
 import PromptUtils from "../utils/PromptUtils";
 
 class ChefClient {
   private options: string[];
-  private singleIterationQuestions: { [key: number]: string[] };
-  private secondIterationQuestions: { [key: number]: string[] };
+  private questions: { [key: number]: string[] };
   private noQuestionsOptions: number[];
 
-  constructor() {
-    this.options = [
-      'View Top 5 Recommended Items', 'Rollout Menu', 'View Menu', 'Finalize Today\'s Menu', 
-      'View Notifications', 'View Discard Menu Item List', 'Logout'
-    ];
-    
-    this.singleIterationQuestions = {
-      2: [
-        'Enter Breakfast Option 1: ', 'Enter Breakfast Option 2: ', 'Enter Breakfast Option 3: ',
-        'Enter Lunch Option 1: ', 'Enter Lunch Option 2: ', 'Enter Lunch Option 3: ',
-        'Enter Dinner Option 1: ', 'Enter Dinner Option 2: ', 'Enter Dinner Option 3: '
-      ],
-    };
-
-    this.secondIterationQuestions = {
-      4: ['Enter Selected Item for breakfast: ', 'Enter Selected Items for lunch: ', 'Enter Selected Items for dinner: '],
-      6: ['Enter Item Id to be discarded from Menu List: ']
-    };
-
-    this.noQuestionsOptions = [1, 3, 4, 5, 7];
+  constructor(role: string) {
+    this.options = USER_OPTIONS[role];
+    this.questions = QUESTIONS[role];
+    this.noQuestionsOptions = NO_QUESTIONS_OPTIONS[role];
   }
 
   async requestHandler(event?: string, preSelectedOption?: number) {
@@ -59,18 +43,11 @@ class ChefClient {
   }
 
   async optionsHandler(selectedOption, isPreSelected?: boolean) {
-    if (
-      !isPreSelected &&
-      this.secondIterationQuestions.hasOwnProperty(selectedOption)
-    ) {
-      return { selectedOption: selectedOption, data: null };
-    }
-
     if (this.noQuestionsOptions.includes(selectedOption) && !isPreSelected) {
       return { selectedOption: selectedOption, data: null };
     }
 
-    const prompts = isPreSelected ? this.secondIterationQuestions[selectedOption] : this.singleIterationQuestions[selectedOption];
+    const prompts = this.questions[selectedOption];
     const answers = await this.collectAnswers(prompts, selectedOption);
 
     return {
@@ -90,22 +67,22 @@ class ChefClient {
   }
 
   private async getValidAnswer(question: string, selectedOption: number, answers: { [key: string]: number}): Promise<number> {
-    let answer: number;
+    let answer: string;
 
     while (true) {
-      answer = parseInt(await PromptUtils.promptMessage(question));
-      if (isNaN(answer)) {
+      answer = await PromptUtils.promptMessage(question);
+      if (!(/^\d+$/.test(answer))) {
         console.log('\n[Warning] Please enter a valid number\n');
         continue;
       }
-      if (selectedOption === 2 && Object.values(answers).includes(answer)) {
+      if (selectedOption === 2 && Object.values(answers).includes(parseInt(answer))) {
         console.log("\n[Warning] Item already added, please enter a different item\n");
         continue;
       }
       break;
     }
 
-    return answer;
+    return parseInt(answer);
   }
 
   private joinRolloutOptions(rollOutItems: { [key: string]: number}): { [key: string]: number[] } {

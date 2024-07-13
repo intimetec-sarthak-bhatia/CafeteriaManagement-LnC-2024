@@ -1,46 +1,17 @@
+import { USER_OPTIONS, QUESTIONS, NO_QUESTIONS_OPTIONS } from "../Enums/userOptions.enum";
 import { ResponseInterface } from "../Interface/Response";
 import PromptUtils from "../utils/PromptUtils";
 
 class EmployeeClient {
   private options: string[];
-  private singleIterationQuestions: { [key: number]: string[] };
+  private questions: { [key: number]: string[] };
   private noQuestionsOptions: number[];
-  private secondIterationQuestions: { [key: number]: string[] };
 
-  constructor() {
-    this.options = [
-      "View Rolled Out Menu",
-      "Give Feedback",
-      "Vote for meals",
-      "View Notifications",
-      "Give feedback for discarded items",
-      "Logout",
-    ];
-
-    this.singleIterationQuestions = {
-      3: [
-        "Enter item id for breakfast: ",
-        "Enter item id for lunch: ",
-        "Enter item id for dinner: ",
-      ],
-    };
-
-    this.noQuestionsOptions = [1, 2, 4, 5];
-
-    this.secondIterationQuestions = {
-      2: [
-        "Enter Item id to give feedback: ",
-        "Enter ratings: ",
-        "Enter comments: ",
-      ],
-      5: [
-        "What you did not like about the item: ",
-        "How would you like the food to be improved: ",
-        "Share your mom's recipe: ",
-      ],
-    };
+  constructor(role: string) {
+    this.options = USER_OPTIONS[role];
+    this.questions = QUESTIONS[role];
+    this.noQuestionsOptions = NO_QUESTIONS_OPTIONS[role];
   }
-
   async requestHandler(event?: string, preSelectedOption?: number) {
     const selectedOption = preSelectedOption && event ? preSelectedOption : await this.showOptions();
     if (selectedOption === 6) return { selectedOption, data: "logout" };
@@ -69,18 +40,12 @@ class EmployeeClient {
   }
 
   async handleOption(selectedOption, isPreSelected?: boolean) {
-    if (
-      !isPreSelected &&
-      this.secondIterationQuestions[selectedOption]
-    ) {
-      return { selectedOption: selectedOption, data: null };
-    }
 
     if (this.noQuestionsOptions.includes(selectedOption) && !isPreSelected) {
       return { selectedOption: selectedOption, data: null };
     }
 
-    const prompts = isPreSelected ? this.secondIterationQuestions[selectedOption] : this.singleIterationQuestions[selectedOption];
+    const prompts = this.questions[selectedOption];
     const answers = await this.collectAnswers(prompts);
 
     return { selectedOption: isPreSelected ? selectedOption + 100 : selectedOption, data: answers };

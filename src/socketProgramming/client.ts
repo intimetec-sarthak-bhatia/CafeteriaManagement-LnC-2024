@@ -22,9 +22,6 @@ class CafeteriaManagementClient {
         this.serverUrl = serverUrl;
         this.socket = io(this.serverUrl);
         this.initializeConnection()
-        this.adminClient = new AdminClient();
-        this.chefClient = new ChefClient();
-        this.employeeClient = new EmployeeClient();
     }
 
 
@@ -43,12 +40,15 @@ class CafeteriaManagementClient {
         let payload: RequestInterface = {};
         switch (User.role) {
             case UserRole.Admin:
+                this.adminClient = new AdminClient(User.role);
                 payload =  await this.adminClient.requestHandler();
                 break;
             case UserRole.Chef:
+                this.chefClient = new ChefClient(User.role);
                 payload =  await this.chefClient.requestHandler(event,selectedOption);
                 break;
             case UserRole.Employee:
+                this.employeeClient = new EmployeeClient(User.role);
                 payload = await this.employeeClient.requestHandler(event,selectedOption);
                 break;
         }

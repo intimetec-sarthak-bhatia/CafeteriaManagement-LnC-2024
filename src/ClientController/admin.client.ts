@@ -1,3 +1,4 @@
+import { USER_OPTIONS, QUESTIONS, NO_QUESTIONS_OPTIONS } from "../Enums/userOptions.enum";
 import { ResponseInterface } from "../Interface/Response";
 import PromptUtils from "../utils/PromptUtils";
 
@@ -6,35 +7,10 @@ class AdminClient {
   private questions: { [key: number]: string[] };
   private noQuestionsOptions: number[];
 
-
-  constructor() {
-    this.options = [
-      "Add Employee",
-      "Add Menu Item",
-      "View Menu Items",
-      "Update Menu Item Price",
-      "Update Menu Item Availability",
-      "Logout"
-    ];
-
-    this.questions = {
-      1: [
-        "Enter Employee Name: ",
-        "Enter Employee Email: ",
-        "Enter Employee Password: ",
-        "Enter Employee Role: ",
-      ],
-      2: [
-        "Enter Menu Item Name: ",
-        "Enter Menu Item Price: ",
-        "Enter Menu Item MealType: ",
-        "Enter Item Availability: ",
-      ],
-      4: ["Enter Menu Item Name: ", "Enter New Price: "],
-      5: ["Enter Menu Item Name: ", "Enter New Availability: "],
-    };
-
-    this.noQuestionsOptions = [3, 6];
+  constructor(role: string) {
+    this.options = USER_OPTIONS[role];
+    this.questions = QUESTIONS[role];
+    this.noQuestionsOptions = NO_QUESTIONS_OPTIONS[role];
   }
 
   async requestHandler() {
