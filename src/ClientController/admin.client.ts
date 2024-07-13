@@ -56,18 +56,18 @@ class AdminClient {
     const answers: { [key: string]: number } = {};
     for (let i = 0; i < prompts.length; i++) {
       const question = prompts[i];
-      const answer = await this.getValidAnswer(question, selectedOption, answers, i);
+      const answer = await this.getValidAnswer(question, selectedOption, i);
       answers[`arg${i + 1}`] = answer;
     }
     return answers;
   }
 
-  private async getValidAnswer(question: string, selectedOption: number, answers: { [key: string]: number}, iteration: number): Promise<number> {
+  private async getValidAnswer(question: string, selectedOption: number, iteration: number): Promise<number> {
     let answer: string;
 
     while (true) {
       answer = await PromptUtils.promptMessage(question);
-      if (this.numTypeQuestions[selectedOption].includes(iteration+1) && !(/^[0-9,.]*$/.test(answer))) {
+      if (this.numTypeQuestions[selectedOption]?.includes(iteration+1) && !(/^[0-9,.]*$/.test(answer))) {
         console.log('\n[Warning] Please enter a valid number\n');
         continue;
       }

@@ -73,7 +73,7 @@ class ChefClient {
 
     while (true) {
       answer = await PromptUtils.promptMessage(question);
-      if (this.numTypeQuestions[selectedOption].includes(iteration+1) && !(/^[0-9,.]*$/.test(answer))) {
+      if (this.numTypeQuestions[selectedOption]?.includes(iteration+1) && !(/^[0-9,.]*$/.test(answer))) {
         console.log('\n[Warning] Please enter a valid number\n');
         continue;
       }

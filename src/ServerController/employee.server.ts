@@ -1,4 +1,5 @@
 import { DailyRecommendationRolloutService } from "../Services/dailyRecommendationRollout";
+import { DiscardItemsService } from "../Services/discardItems";
 import { FeedbackService } from "../Services/feedback";
 import { MenuItemService } from "../Services/menuItem";
 import { NotificationService } from "../Services/notification";
@@ -9,12 +10,14 @@ class EmployeeController {
     private feedbackService: FeedbackService;
     private notificationService: NotificationService;
     private menuItemService: MenuItemService;
+    private discardItemService: DiscardItemsService;
 
     constructor() {
         this.dailyRecommendationService = new DailyRecommendationRolloutService();
         this.feedbackService = new FeedbackService();
         this.notificationService = new NotificationService();
         this.menuItemService = new MenuItemService();
+        this.discardItemService = new DiscardItemsService();
     }
     
     async handleRequest(payload) {
@@ -73,12 +76,12 @@ class EmployeeController {
     }
 
     private async viewDiscardedItems() {
-        const discardedItems = await this.menuItemService.viewThisMonthsDiscardedItems();
+        const discardedItems = await this.discardItemService.viewThisMonthsDiscardedItems();
         return {data: discardedItems, dataType: 'table', event: 'secondInteration'};
     }
 
     private async submitDiscardedItemFeedback(userId: number, didNotLike: string, toImprove: string, momsRecipe: string) {
-        const result = await this.menuItemService.addDiscardedItemFeedback(userId, didNotLike, toImprove, momsRecipe);
+        const result = await this.discardItemService.addDiscardedItemFeedback(userId, didNotLike, toImprove, momsRecipe);
         return {data: result, dataType: 'message', event: 'feedbackSubmitted'};
     }
 
