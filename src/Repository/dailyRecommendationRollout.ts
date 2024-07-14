@@ -23,7 +23,15 @@ export class DailyRecommendationRolloutRepository {
         const connection = await pool.getConnection();
         try {
             const [rows] = await connection.query<any>(
-                'SELECT dr.itemId,dr.votes, mi.name AS Item, c.category AS Category, mi.sentimentScore AS "Sentiment Score" FROM DailyRecommendationRollout dr JOIN MenuItem mi ON dr.itemId = mi.id JOIN Category c ON dr.categoryId = c.id WHERE  dr.date = ?',
+                `SELECT dr.itemId,dr.votes, mi.name AS Item, c.category AS Category, mi.sentimentScore AS "Sentiment Score",
+                fc.type AS dietType,
+                fc.spiceLevel,
+                fc.cuisine
+                FROM DailyRecommendationRollout dr 
+                JOIN MenuItem mi ON dr.itemId = mi.id 
+                JOIN Category c ON dr.categoryId = c.id 
+                JOIN foodCharacteristics fc ON mi.id = fc.itemId
+                WHERE  dr.date = ?`,
                 [date]
             );
             return rows;

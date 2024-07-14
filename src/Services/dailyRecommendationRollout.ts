@@ -3,12 +3,15 @@ import { DailyRecommendationRolloutRepository } from "../Repository/dailyRecomme
 import { UserVotesRepository } from "../Repository/userVotes";
 import { MealCategory } from "../Enums/mealCategory.enum";
 import { NotificationService } from "./notification";
+import { UserPreference } from "../Interface/UserPreference";
+import { UserPreferenceRepository } from "../Repository/userPreference";
 
 export class DailyRecommendationRolloutService {
   private dailyRecommendationRolloutRepository =
     new DailyRecommendationRolloutRepository();
   private userVotesRepository = new UserVotesRepository();
   private notficatonService = new NotificationService();
+  private userPreferenceRepository = new UserPreferenceRepository();
 
   async add(
     breakfastItems: number[],
@@ -18,7 +21,9 @@ export class DailyRecommendationRolloutService {
     const todaysRecommendations = await this.getTodays();
 
     if (todaysRecommendations.length) {
-      throw new Error("[ Warning !! ] Daily Recommendations already added for today!");
+      throw new Error(
+        "[ Warning !! ] Daily Recommendations already added for today!"
+      );
     }
     const itemSplits = [
       { items: breakfastItems, categoryId: 1 },
@@ -35,12 +40,12 @@ export class DailyRecommendationRolloutService {
         };
 
         await this.dailyRecommendationRolloutRepository.create(item);
-        await this.notficatonService.addNotification(
-          `Today's Recommended Menu Has Been Rolled Out \n You can vote for the items !`,
-          "employee"
-        );
       }
     }
+    await this.notficatonService.addNotification(
+      `Today's Recommended Menu Has Been Rolled Out \n You can vote for the items !`,
+      "employee"
+    );
 
     return "Daily Recommendations added successfully!";
   }
@@ -55,13 +60,98 @@ export class DailyRecommendationRolloutService {
     return result;
   }
 
+  async getTodaysByUser(userId: number): Promise<any[]> {
+    const date = new Date();
+    const formattedDate = date.toISOString().split("T")[0];
+    const result =
+      await this.dailyRecommendationRolloutRepository.getDailyRecommendationRolloutByDate(
+        formattedDate
+      );
+
+    const userPreference = await this.userPreferenceRepository.getUserPreference(userId);
+    if(!userPreference) {
+      return this.deleteUnwantedCOlunmns(result);
+    }
+    const sortedItemsByPreference = this.sortItemsByPreference(result, userPreference);
+    
+    return this.deleteUnwantedCOlunmns(sortedItemsByPreference);
+  }
+
+  sortItemsByPreference(items, userPreference: UserPreference) {
+    items.sort((menuItem1, menuItem2) => {
+
+      const item1MatchesUserPreferences = this.isPreferenceFullMatch(menuItem1, userPreference);
+      const item2MatchesUserPreferences = this.isPreferenceFullMatch(menuItem2, userPreference);
+
+      if (item1MatchesUserPreferences && !item2MatchesUserPreferences) {
+        return -1;
+      }
+      if (!item1MatchesUserPreferences && item2MatchesUserPreferences) {
+        return 1;
+      }
+
+      const aPartialMatchScore = this.getPartialPreferenceMatchScore(
+        menuItem1,
+        userPreference
+      );
+      const bPartialMatchScore = this.getPartialPreferenceMatchScore(
+        menuItem2,
+        userPreference
+      );
+
+      if (aPartialMatchScore !== bPartialMatchScore) {
+        return bPartialMatchScore - aPartialMatchScore;
+      }
+
+      return 0;
+    });
+    return items;
+  }
+
+  isPreferenceFullMatch(item: any, userPreference: UserPreference): boolean {
+    const userDietType = userPreference.dietType;
+    const userPreferredCuisine = userPreference.preferredCuisine;
+    const userSpiceLevel = userPreference.spiceLevel;
+
+    return ( 
+      item.dietType === userDietType &&
+      item.cuisine === userPreferredCuisine &&
+      item.spiceLevel === userSpiceLevel
+    );
+  }
+
+  getPartialPreferenceMatchScore(item, userPreference: UserPreference): number {
+    const userDietType = userPreference.dietType.toLowerCase();
+    const userPreferredCuisine = userPreference.preferredCuisine.toLowerCase();
+    const userSpiceLevel = userPreference.spiceLevel;
+
+    let score = 0;
+    if (item.dietType.toLowerCase() === userDietType) score += 3;
+    if (item.spiceLevel === userSpiceLevel) score += 2;
+    if (item.cuisine.toLowerCase() === userPreferredCuisine) score += 1;
+    return score;
+  }
+
   async getSelectedMenuYesterdays(): Promise<any[]> {
     const yesterdayDate = new Date(new Date().setDate(new Date().getDate() - 1))
       .toISOString()
       .split("T")[0];
-    return this.dailyRecommendationRolloutRepository.getSelectedMenuItems(
+    const result =  await this.dailyRecommendationRolloutRepository.getSelectedMenuItems(
       yesterdayDate
     );
+    if(!result.length) {
+      throw new Error("[WARNING !] No menu items rolled out for yesterday");
+    }
+    return result;
+  }
+
+  async deleteUnwantedCOlunmns(items) {
+    items.forEach((item) => {
+      delete item.dietType;
+      delete item.spiceLevel;
+      delete item.cuisine;
+    });
+    return items;
   }
 
   async voteMeal(
@@ -70,13 +160,12 @@ export class DailyRecommendationRolloutService {
     lunchId: number,
     dinnerId: number
   ) {
-    try {
       const date = new Date().toISOString().split("T")[0];
       const rolledOutMenu =
         await this.dailyRecommendationRolloutRepository.getDailyRecommendationRolloutByDate(
           date
         );
-      if(rolledOutMenu.length === 0) {
+      if (rolledOutMenu.length === 0) {
         throw new Error("[WARNING !] No menu items rolled out for today");
       }
       const itemIds = rolledOutMenu.map((item) => item.itemId);
@@ -89,7 +178,7 @@ export class DailyRecommendationRolloutService {
           "[WARNING !] Item provided doesn't exist in today's recommended rollout"
         );
       }
-      this.checkItemCategory(rolledOutMenu, breakfastId, lunchId, dinnerId); 
+      this.checkItemCategory(rolledOutMenu, breakfastId, lunchId, dinnerId);
       const userVotesToday = await this.userVotesRepository.getVotesByDate(
         userId,
         date
@@ -97,18 +186,20 @@ export class DailyRecommendationRolloutService {
       if (userVotesToday.length === 3) {
         throw new Error("[WARNING !] You have already voted menu for today");
       }
-      
-      const votedRollOutMenuIds: number[] = await this.incrementVoteCount(rolledOutMenu, breakfastId, lunchId, dinnerId);;
-      
+
+      const votedRollOutMenuIds: number[] = await this.incrementVoteCount(
+        rolledOutMenu,
+        breakfastId,
+        lunchId,
+        dinnerId
+      );
+
       const result = await this.userVotesRepository.addUserVote(
         userId,
         votedRollOutMenuIds,
         date
       );
       return result;
-    } catch (error) {
-      throw error;
-    }
   }
 
   async finalizeMenu(
@@ -124,8 +215,6 @@ export class DailyRecommendationRolloutService {
     if (selectedMenu.length) {
       throw new Error("[ Warning !! ] Menu already finalized for today!");
     }
-    // const lunchItems = lunch.split(",");
-    // const dinnerItems = dinner.split(",");
     const itemsExistsInMenu = await this.checkItemsExistsInMenu([
       breakfast,
       ...lunch,
@@ -166,7 +255,6 @@ export class DailyRecommendationRolloutService {
         );
       }
     });
-
   }
 
   async incrementVoteCount(rolledOutMenu, breakfastId, lunchId, dinnerId) {

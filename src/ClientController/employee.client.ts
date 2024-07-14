@@ -17,7 +17,6 @@ class EmployeeClient {
   async requestHandler(event?: string, preSelectedOption?: number) {
     const selectedOption = preSelectedOption && event ? preSelectedOption : await this.showOptions();
     if (selectedOption === this.options.length) return { selectedOption, data: "logout" };
-
     const reqPayload = await this.handleOption(selectedOption, !!event);
     return reqPayload;
   }
@@ -37,8 +36,8 @@ class EmployeeClient {
     });
 
     const selectedOption = await PromptUtils.promptMessage("Enter your choice: ");
-    await this.verifySelectedOption(selectedOption);
-    return parseInt(selectedOption);
+    const verifiedOption = await this.verifySelectedOption(selectedOption);
+    return verifiedOption;
   }
 
   async handleOption(selectedOption, isPreSelected?: boolean) {
@@ -81,14 +80,13 @@ class EmployeeClient {
   async verifySelectedOption(selectedOption: string) {
     if (isNaN(parseInt(selectedOption)) || parseInt(selectedOption) < 1) {
       console.log("\n[Warning] Please enter correct data type:number\n");
-      await this.showOptions();
-      return;
+      return await this.showOptions();
     }
     if (parseInt(selectedOption) > this.options.length) {
       console.log("\n[Warning] Please enter correct option\n");
-      await this.showOptions();
-      return;
+      return await this.showOptions();
     }
+    return parseInt(selectedOption);
   }
 }
 

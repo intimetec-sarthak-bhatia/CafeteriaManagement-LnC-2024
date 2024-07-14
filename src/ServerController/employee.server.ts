@@ -25,7 +25,7 @@ class EmployeeController {
         const args = payload.data;
         switch(payload.selectedOption) {
             case 1:
-                return await this.viewTodaysRollout();
+                return await this.viewTodaysRollout(payload.user.id);
             case 2:
                 return await this.viewYesterdayRollout();
             case 3:
@@ -51,8 +51,8 @@ class EmployeeController {
     }
 
 
-    private async viewTodaysRollout(): Promise<any> {
-        const recommendedItems = await this.dailyRecommendationService.getTodays();
+    private async viewTodaysRollout(userId: number): Promise<any> {
+        const recommendedItems = await this.dailyRecommendationService.getTodaysByUser(userId);
         if(!recommendedItems.length) {
             throw new Error('No recommendations added for today');
         }
@@ -72,8 +72,8 @@ class EmployeeController {
         return {data: result, dataType: 'message', event: 'feedbackSubmitted'};
     }
 
-    private async voteMeal(userId: number, breakfastId: string, lunchId: string, dinnerId: string) {
-        const result = await this.dailyRecommendationService.voteMeal(userId, parseInt(breakfastId), parseInt(lunchId), parseInt(dinnerId));
+    private async voteMeal(userId: number, breakfastId: number, lunchId: number, dinnerId: number) {
+        const result = await this.dailyRecommendationService.voteMeal(userId, breakfastId, lunchId, dinnerId);
         return {data: result, dataType: 'message', event: 'mealVoted'};
     }
 
@@ -92,12 +92,12 @@ class EmployeeController {
         return {data: result, dataType: 'message', event: 'feedbackSubmitted'};
     }
 
-    private async addUserPreference(userId: number, dietType, spiceLevel, preferredCuisine, sweetTooth) {
+    private async addUserPreference(userId: number, dietType: number, spiceLevel: number, preferredCuisine: string, sweetTooth: number) {
         const result = await this.userPreferenceService.add(userId, dietType, spiceLevel, preferredCuisine, sweetTooth);
         return {data: result, dataType: 'message', event: 'preferenceAdded'};
     }
 
-    private async updateUserPreference(userId: number, dietType, spiceLevel, preferredCuisine, sweetTooth) {
+    private async updateUserPreference(userId: number, dietType: number, spiceLevel: number, preferredCuisine: string, sweetTooth: number) {
         const result = await this.userPreferenceService.update(userId, dietType, spiceLevel, preferredCuisine, sweetTooth);
         return {data: result, dataType: 'message', event: 'preferenceUpdated'};
     }

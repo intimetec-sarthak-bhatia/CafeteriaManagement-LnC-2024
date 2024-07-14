@@ -3,7 +3,6 @@ import { User } from '../Interface/User';
 
 export class UserRepository {
   async createUser(user: User): Promise<number> {
-    console.log("InRepo:", user);
     const connection = await pool.getConnection();
     try {
       const [result] = await connection.query<any>(

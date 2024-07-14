@@ -34,10 +34,11 @@ export class MenuItemService {
     return result;
   }
 
-  async getTopMenuItems(amount: number = 5): Promise<any> {
+  async getTopMenuItems(amount: number = 10): Promise<any> {
     const menuItems = await this.menuRepository.getTopMenuItems(amount);
     const menuItemsByCategory = await this.groupByCategory(menuItems);
-    return menuItemsByCategory;
+    const sortedMenuItems = await this.sortMenuItemsByCategory(menuItemsByCategory);
+    return sortedMenuItems;
   }
 
   async updatePrice(price: number, name: string): Promise<string> {
@@ -81,6 +82,19 @@ export class MenuItemService {
         item.category = "lunch/dinner";
       }
     }
+    return menuItems;
+  }
+
+  async sortMenuItemsByCategory(menuItems) {
+    menuItems.sort((a, b) => {
+      if (a.category === "breakfast" && b.category !== "breakfast") {
+        return -1;
+      } else if (a.category !== "breakfast" && b.category === "breakfast") {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
     return menuItems;
   }
 

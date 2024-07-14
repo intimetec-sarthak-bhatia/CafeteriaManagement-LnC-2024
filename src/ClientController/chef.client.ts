@@ -40,8 +40,8 @@ class ChefClient {
     const selectedOption = await PromptUtils.promptMessage(
       "Enter your choice: "
     );
-    await this.verifySelectedOption(selectedOption, this.options);
-    return parseInt(selectedOption);
+    const verifiedOption = await this.verifySelectedOption(selectedOption, this.options);
+    return verifiedOption;
   }
 
   async optionsHandler(selectedOption, isPreSelected?: boolean) {
@@ -58,8 +58,8 @@ class ChefClient {
     };
   }
 
-  private async collectAnswers(prompts: string[], selectedOption: number): Promise<{ [key: string]: number}> {
-    const answers: { [key: string]: number } = {};
+  private async collectAnswers(prompts: string[], selectedOption: number): Promise<{ [key: string]: number | string}> {
+    const answers: { [key: string]: number | string } = {};
     for (let i = 0; i < prompts.length; i++) {
       const question = prompts[i];
       const answer = await this.getValidAnswer(question, selectedOption, answers, i);
@@ -68,7 +68,7 @@ class ChefClient {
     return answers;
   }
 
-  private async getValidAnswer(question: string, selectedOption: number, answers: { [key: string]: number}, iteration: number): Promise<number> {
+  private async getValidAnswer(question: string, selectedOption: number, answers: { [key: string]: number | string}, iteration: number): Promise<number | string> {
     let answer: string;
 
     while (true) {
@@ -84,10 +84,10 @@ class ChefClient {
       break;
     }
 
-    return parseInt(answer);
+    return this.numTypeQuestions[selectedOption]?.includes(iteration+1) ? parseInt(answer): answer;
   }
 
-  private joinRolloutOptions(rollOutItems: { [key: string]: number}): { [key: string]: number[] } {
+  private joinRolloutOptions(rollOutItems: { [key: string]: number | string}): { [key: string]: (string | number)[] } {
     return {
       arg1: [rollOutItems.arg1, rollOutItems.arg2, rollOutItems.arg3],
       arg2: [rollOutItems.arg4, rollOutItems.arg5, rollOutItems.arg6],
@@ -98,8 +98,7 @@ class ChefClient {
   async verifySelectedOption(selectedOption: string, options?: string[]) {
     if (isNaN(parseInt(selectedOption))) {
       console.log("\n[Warning] Please enter correct data type:number\n");
-      await this.showOptions();
-      return;
+      return await this.showOptions();
     }
     if (
       options &&
@@ -107,9 +106,9 @@ class ChefClient {
         parseInt(selectedOption) < 1)
     ) {
       console.log("\n[Warning] Please enter correct option\n");
-      await this.showOptions();
-      return;
+      return await this.showOptions();
     }
+    return parseInt(selectedOption);
   }
 }
 

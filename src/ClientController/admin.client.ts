@@ -38,8 +38,8 @@ class AdminClient {
     });
 
     const selectedOption = await PromptUtils.promptMessage("Enter your choice: ");
-    await this.verifySelectedOption(selectedOption);
-    return parseInt(selectedOption);
+    const verifiedOption = await this.verifySelectedOption(selectedOption);
+    return verifiedOption;
   }
 
   async optionsHandler(selectedOption) {
@@ -51,8 +51,8 @@ class AdminClient {
     return { selectedOption: selectedOption, data: answers };
   }
 
-  private async collectAnswers(prompts: string[], selectedOption: number): Promise<{ [key: string]: number }> {
-    const answers: { [key: string]: number } = {};
+  private async collectAnswers(prompts: string[], selectedOption: number): Promise<{ [key: string]: number| string }> {
+    const answers: { [key: string]: number | string } = {};
     for (let i = 0; i < prompts.length; i++) {
       const question = prompts[i];
       const answer = await this.getValidAnswer(question, selectedOption, i);
@@ -61,7 +61,7 @@ class AdminClient {
     return answers;
   }
 
-  private async getValidAnswer(question: string, selectedOption: number, iteration: number): Promise<number> {
+  private async getValidAnswer(question: string, selectedOption: number, iteration: number): Promise<number | string> {
     let answer: string;
 
     while (true) {
@@ -73,20 +73,20 @@ class AdminClient {
       break;
     }
 
-    return parseInt(answer);
+    return this.numTypeQuestions[selectedOption]?.includes(iteration+1) ? parseInt(answer): answer;
   }
 
   async verifySelectedOption(selectedOption: string) {
     if (isNaN(parseInt(selectedOption)) || parseInt(selectedOption) < 1) {
       console.log("\n[Warning] Please enter correct data type:number\n");
-      await this.showOptions();
-      return;
+      return await this.showOptions();
     }
     if (parseInt(selectedOption) > this.options.length) {
       console.log("\n[Warning] Please enter correct option\n");
-      await this.showOptions();
-      return;
+      return await this.showOptions(); 
     }
+
+    return parseInt(selectedOption);
   }
 }
 

@@ -9,7 +9,7 @@ export class UserPreferenceService {
     this.userPreferenceRepository = new UserPreferenceRepository();
   }
 
-  public async get(userId: number) {
+  public async get(userId: number): Promise<UserPreference> {
     const userPreference =
       await this.userPreferenceRepository.getUserPreference(userId);
     if (!userPreference) {
