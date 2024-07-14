@@ -16,7 +16,7 @@ class EmployeeClient {
   }
   async requestHandler(event?: string, preSelectedOption?: number) {
     const selectedOption = preSelectedOption && event ? preSelectedOption : await this.showOptions();
-    if (selectedOption === 6) return { selectedOption, data: "logout" };
+    if (selectedOption === this.options.length) return { selectedOption, data: "logout" };
 
     const reqPayload = await this.handleOption(selectedOption, !!event);
     return reqPayload;
@@ -53,8 +53,8 @@ class EmployeeClient {
     return { selectedOption: isPreSelected ? selectedOption + 100 : selectedOption, data: answers };
   }
 
-  private async collectAnswers(prompts: string[], selectedOption: number): Promise<{ [key: string]: number }> {
-    const answers: { [key: string]: number } = {};
+  private async collectAnswers(prompts: string[], selectedOption: number): Promise<{ [key: string]: number | string }> {
+    const answers: { [key: string]: number | string } = {};
     for (let i = 0; i < prompts.length; i++) {
       const question = prompts[i];
       const answer = await this.getValidAnswer(question, selectedOption, i);
@@ -63,7 +63,7 @@ class EmployeeClient {
     return answers;
   }
 
-  private async getValidAnswer(question: string, selectedOption: number, iteration: number): Promise<number> {
+  private async getValidAnswer(question: string, selectedOption: number, iteration: number): Promise<number | string> {
     let answer: string;
 
     while (true) {
@@ -75,7 +75,7 @@ class EmployeeClient {
       break;
     }
 
-    return parseInt(answer);
+    return this.numTypeQuestions[selectedOption]?.includes(iteration+1) ? parseInt(answer): answer;
   }
 
   async verifySelectedOption(selectedOption: string) {

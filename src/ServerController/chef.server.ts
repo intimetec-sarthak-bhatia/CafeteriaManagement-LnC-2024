@@ -1,17 +1,20 @@
 import { MenuItemService } from "../Services/menuItem";
 import { DailyRecommendationRolloutService } from "../Services/dailyRecommendationRollout";
 import { NotificationService } from "../Services/notification";
+import { DiscardItemsService } from "../Services/discardItems";
 
 class ChefController {
 
     private menuItemService: MenuItemService;
     private dailyRecommendationService: DailyRecommendationRolloutService;
     private notificationService: NotificationService;
+    private discardItemsService: DiscardItemsService;
 
     constructor() {
         this.menuItemService = new MenuItemService();
         this.dailyRecommendationService = new DailyRecommendationRolloutService();
         this.notificationService = new NotificationService();
+        this.discardItemsService = new DiscardItemsService();
     }
     
     async handleRequest(payload) {
@@ -72,12 +75,12 @@ class ChefController {
     }
 
     private async getDiscardMenuItems() {
-        const discardMenuItems = await this.menuItemService.getSuggestedDiscardItems();
+        const discardMenuItems = await this.discardItemsService.getSuggestedDiscardItems();
         return {data: discardMenuItems, dataType: 'table', event: 'secondInteration'};
     }
 
     private async discardMenuItem(itemId: number) {
-        const result = await this.menuItemService.addDiscardItem(itemId);
+        const result = await this.discardItemsService.addDiscardItem(itemId);
         return {data: result, dataType: 'message', event: 'discardMenuItem'};
     }
 

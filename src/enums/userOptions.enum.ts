@@ -24,6 +24,9 @@ export const USER_OPTIONS = {
     "Vote for meals",
     "View Notifications",
     "Give feedback for discarded items",
+    "View User Preferences",
+    "Add User Preferences",
+    "Update User Preferences",
     "Logout"
   ]
 };
@@ -47,14 +50,18 @@ export const QUESTIONS = {
   [UserRole.Employee]: {
     3: ["Enter item id for breakfast: ", "Enter item id for lunch: ", "Enter item id for dinner: "],
     2: ["Enter Item id to give feedback: ", "Enter ratings: ", "Enter comments: "],
-    5: ["What you did not like about the item: ", "How would you like the food to be improved: ", "Share your mom's recipe: "]
+    5: ["What you did not like about the item: ", "How would you like the food to be improved: ", "Share your mom's recipe: "],
+    7: ["Enter your diet type (1: Vegetarian, 2: Non-Vegetarian, 3: Eggetarian): ", "Enter your spice level(1:Low , 2: Medium, 3: High):", "Enter your cuisine preference eg.(North-Indian, South-Indian, Mexican, etc.): ",
+      "Are you a sweet tooth person? (1: Yes, 2: No): "],
+    8: ["Enter your diet type (1: Vegetarian, 2: Non-Vegetarian, 3: Eggetarian): ", "Enter your spice level(1:Low , 2: Medium, 3: High):", "Enter your cuisine preference eg.(North-Indian, South-Indian, Mexican, etc.): ",
+      "Are you a sweet tooth person? (1: Yes, 2: No): "]
   }
 };
 
 export const NO_QUESTIONS_OPTIONS = {
   [UserRole.Admin]: [3, 6],
   [UserRole.Chef]: [1, 3, 4, 5, 7],
-  [UserRole.Employee]: [1, 2, 4, 5]
+  [UserRole.Employee]: [1, 2, 4, 5, 6]
 };
 
 export const NUM_TYPE_QUESTIONS = {
@@ -71,7 +78,9 @@ export const NUM_TYPE_QUESTIONS = {
   },
   [UserRole.Employee]: {
     3: [1,2,3],
-    2: [1,2]
+    2: [1,2],
+    7: [1,2,4],
+    8: [1,2,4]
   }
 };
 

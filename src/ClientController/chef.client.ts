@@ -33,7 +33,7 @@ class ChefClient {
   }
 
   async showOptions() {
-    console.log("Please select an option:");
+    console.log("Please select an option: \n");
     this.options.forEach((option, index) => {
       console.log(`${index + 1}. ${option}`);
     });
