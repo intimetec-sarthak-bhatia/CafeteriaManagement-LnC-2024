@@ -1,3 +1,4 @@
+import { DatabaseError } from "../Exceptions/database-exception";
 import pool from "../database";
 
 export class DiscardedItemsFeedbackRepository {
@@ -12,7 +13,7 @@ export class DiscardedItemsFeedbackRepository {
             );
             return rows[0];
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error adding discarded Item Feedback', error);
         } finally {
             connection.release();
         }
@@ -26,7 +27,7 @@ export class DiscardedItemsFeedbackRepository {
             );
             return rows;
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error fetching Discarded Items Feedback', error);
         } finally {
             connection.release();
         }

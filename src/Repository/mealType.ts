@@ -1,3 +1,4 @@
+import { DatabaseError } from '../Exceptions/database-exception';
 import pool from '../database';
 
 export class MealTypeRepository {
@@ -10,7 +11,7 @@ export class MealTypeRepository {
       );
       return rows[0]?.type || null;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching mealType', error);
     } finally {
       connection.release();
     }

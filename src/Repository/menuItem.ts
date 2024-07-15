@@ -1,4 +1,5 @@
 import pool from "../database";
+import { DatabaseError } from "../Exceptions/database-exception";
 import { MenuItem } from "../Interface/MenuItem";
 
 export class MenuItemRepository {
@@ -11,7 +12,7 @@ export class MenuItemRepository {
       );
       return result.insertId;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error adding menu item', error);
     } finally {
       connection.release();
     }
@@ -32,7 +33,7 @@ export class MenuItemRepository {
       );
       return rows;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching MenuItem', error);
     } finally {
       connection.release();
     }
@@ -46,7 +47,7 @@ export class MenuItemRepository {
       );
       return rows;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching MenuItems', error);
     } finally {
       connection.release();
     }
@@ -61,7 +62,7 @@ export class MenuItemRepository {
       );
       return rows;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching menuItem', error);
     } finally {
       connection.release();
     }
@@ -76,7 +77,7 @@ export class MenuItemRepository {
       );
       return rows[0];
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching menuItem', error);
     } finally {
       connection.release();
     }
@@ -91,7 +92,7 @@ export class MenuItemRepository {
       );
       return rows[0];
     } catch (error) {
-      throw new Error("Item not found with this name");
+      throw new DatabaseError('Item not found with this name', error);
     } finally {
       connection.release();
     }
@@ -106,7 +107,7 @@ export class MenuItemRepository {
       );
       return rows;
     } catch (error) {
-      throw new Error("Item not found with this id");
+      throw new DatabaseError("Item not found with this id", error);
     } finally {
       connection.release();
     }
@@ -121,7 +122,7 @@ export class MenuItemRepository {
       );
       return rows[0];
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Item Id not found', error);
     } finally {
       connection.release();
     }

@@ -1,4 +1,4 @@
-// auth.service.ts
+import { UnauthorizedError } from "../Exceptions/unauthorized-exception";
 import { User } from "../Interface/User";
 import { UserService } from "./user";
 
@@ -14,7 +14,7 @@ class AuthService {
     if (user && user.password === password) {
       return user;
     }
-    throw new Error("Invalid Credentials!");
+    throw new UnauthorizedError("Invalid Credentials!");
   }
 }
 

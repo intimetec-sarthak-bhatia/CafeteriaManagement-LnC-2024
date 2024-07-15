@@ -1,3 +1,4 @@
+import { DatabaseError } from '../Exceptions/database-exception';
 import pool from '../database';
 
 export class FeedBackRepository {
@@ -12,7 +13,7 @@ export class FeedBackRepository {
       );
       return rows || null;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching Feedback', error);
     } finally {
       connection.release();
     }
@@ -27,7 +28,7 @@ export class FeedBackRepository {
       );
       return rows[0] || null;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error adding Feedback', error);
     } finally {
       connection.release();
     }

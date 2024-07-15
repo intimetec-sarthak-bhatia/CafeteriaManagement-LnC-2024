@@ -3,6 +3,7 @@ import { NotificationService } from "./notification";
 import { DiscardedItemsFeedbackRepository } from "../Repository/discardedItemsFeedback";
 import { MenuItemService } from "./menuItem";
 import { DiscardItemRepository } from "../Repository/discardItem";
+import { NotFoundError } from "../Exceptions/notFound-exception";
 
 export class DiscardItemsService {
   private discardedItemsFeedbackRepository = new DiscardedItemsFeedbackRepository();
@@ -12,10 +13,10 @@ export class DiscardItemsService {
 
   async getSuggestedDiscardItems(): Promise<MenuItem[]> {
     if(await this.checkIfItemDiscardedThisMonth()){
-      throw new Error('Item already discarded this month, please wait for next month to discard again');
+      throw new Error('[Warning] Item already discarded this month, please wait for next month to discard again');
     }
     const items = await this.discardedItemsRepository.suggestDiscardedItems();
-    if(!items.length) throw new Error('No suggestions for discard items found !');
+    if(!items.length) throw new NotFoundError('No suggestions for discard items found !');
     return items;
   }
 

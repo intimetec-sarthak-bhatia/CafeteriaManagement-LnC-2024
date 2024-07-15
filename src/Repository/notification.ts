@@ -1,3 +1,4 @@
+import { DatabaseError } from '../Exceptions/database-exception';
 import { Notification } from '../Interface/Notification';
 import pool from '../database';
 
@@ -14,7 +15,7 @@ export class NotificationRepository {
                [notification, date, role]);
             return rows.insertId;
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error adding notification, please enter correct role', error);
         } finally {
             connection.release();
         }
@@ -30,7 +31,7 @@ export class NotificationRepository {
                 ORDER BY n.date DESC`, [date, role]);
             return rows;
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error fetching notifications', error);
         } finally {
             connection.release();
         }

@@ -1,3 +1,4 @@
+import { NotFoundError } from "../Exceptions/notFound-exception";
 import { Notification } from "../Interface/Notification";
 import { NotificationRepository } from "../Repository/notification";
 
@@ -18,7 +19,7 @@ export class NotificationService {
   async viewNotifications(role: string): Promise<Notification[]> {
     const date = new Date().toISOString().slice(0, 19).replace("T", " ");
     const result = await this.notificationRepository.viewByRole(date, role);
-    if (result.length === 0) throw new Error("No new notifications for today!");
+    if (result.length === 0) throw new NotFoundError("No new notifications for today!");
     return result;
   }
 }

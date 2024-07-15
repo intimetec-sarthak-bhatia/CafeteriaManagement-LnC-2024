@@ -1,5 +1,4 @@
 import { UserRoleRepository } from "../Repository/userRole";
-import { UserRepository } from "../Repository/user";
 import { UserRole } from "../Interface/UserRole";
 
 export class UserRoleService {

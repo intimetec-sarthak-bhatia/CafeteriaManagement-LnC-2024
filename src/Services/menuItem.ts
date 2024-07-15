@@ -3,6 +3,8 @@ import { MenuItemRepository } from "../Repository/menuItem";
 import { MenuItem } from "../Interface/MenuItem";
 import { NotificationService } from "./notification";
 import { UserRole } from "../Enums/userRoles.enum";
+import { Not } from "typeorm";
+import { NotFoundError } from "../Exceptions/notFound-exception";
 
 export class MenuItemService {
   private menuRepository = new MenuItemRepository();
@@ -31,11 +33,17 @@ export class MenuItemService {
 
   async getAll(): Promise<MenuItem[]> {
     const result = await this.menuRepository.getAllMenuItems();
+    if(!result.length) {
+      throw new NotFoundError('No menu items found!');
+    }
     return result;
   }
 
   async getTopMenuItems(amount: number = 10): Promise<any> {
     const menuItems = await this.menuRepository.getTopMenuItems(amount);
+    if(!menuItems.length) {
+      throw new NotFoundError('No menu items found!');
+    }
     const menuItemsByCategory = await this.groupByCategory(menuItems);
     const sortedMenuItems = await this.sortMenuItemsByCategory(menuItemsByCategory);
     return sortedMenuItems;
@@ -67,6 +75,9 @@ export class MenuItemService {
 
   async getMenuItemById(id: number): Promise<MenuItem> {
     const result = await this.menuRepository.getMenuItemById(id);
+    if(!result) {
+      throw new NotFoundError('No menu item found with this id!');
+    }
     return result;
   }
 

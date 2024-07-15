@@ -16,11 +16,9 @@ class ChefClient {
   }
 
   async requestHandler(event?: string, preSelectedOption?: number) {
-    const selectedOption =
-      preSelectedOption && event ? preSelectedOption : await this.showOptions();
-    if (selectedOption === 7)
-      return { selectedOption: selectedOption, data: "logout" };
-    const reqPayload = await this.optionsHandler(selectedOption);
+    const selectedOption = preSelectedOption && event ? preSelectedOption : await this.showOptions();
+    if (selectedOption === this.options.length) return { selectedOption, data: "logout" };
+    const reqPayload = await this.optionsHandler(selectedOption, !!event);
     return reqPayload;
   }
 
@@ -33,14 +31,13 @@ class ChefClient {
   }
 
   async showOptions() {
-    console.log("Please select an option: \n");
+    console.log("Please select an option:");
     this.options.forEach((option, index) => {
       console.log(`${index + 1}. ${option}`);
     });
-    const selectedOption = await PromptUtils.promptMessage(
-      "Enter your choice: "
-    );
-    const verifiedOption = await this.verifySelectedOption(selectedOption, this.options);
+
+    const selectedOption = await PromptUtils.promptMessage("Enter your choice: ");
+    const verifiedOption = await this.verifySelectedOption(selectedOption);
     return verifiedOption;
   }
 
@@ -95,16 +92,13 @@ class ChefClient {
     };
   }
 
-  async verifySelectedOption(selectedOption: string, options?: string[]) {
+  async verifySelectedOption(selectedOption: string) {
     if (isNaN(parseInt(selectedOption))) {
       console.log("\n[Warning] Please enter correct data type:number\n");
       return await this.showOptions();
     }
-    if (
-      options &&
-      (parseInt(selectedOption) > options.length ||
-        parseInt(selectedOption) < 1)
-    ) {
+    if (parseInt(selectedOption) > this.options.length ||
+        parseInt(selectedOption) < 1){
       console.log("\n[Warning] Please enter correct option\n");
       return await this.showOptions();
     }

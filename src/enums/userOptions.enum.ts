@@ -10,7 +10,7 @@ export const USER_OPTIONS = {
     "Logout"
   ],
   [UserRole.Chef]: [
-    "View Top 5 Recommended Items",
+    "View Top 10 Recommended Items",
     "Rollout Menu",
     "View Menu",
     "Finalize Today's Menu",
@@ -60,7 +60,7 @@ export const QUESTIONS = {
 
 export const NO_QUESTIONS_OPTIONS = {
   [UserRole.Admin]: [3, 6],
-  [UserRole.Chef]: [1, 3, 4, 5, 7],
+  [UserRole.Chef]: [1, 3, 4, 5, 6, 7],
   [UserRole.Employee]: [1, 2, 4, 5, 6]
 };
 

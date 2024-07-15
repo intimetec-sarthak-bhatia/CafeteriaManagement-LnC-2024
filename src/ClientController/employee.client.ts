@@ -17,7 +17,7 @@ class EmployeeClient {
   async requestHandler(event?: string, preSelectedOption?: number) {
     const selectedOption = preSelectedOption && event ? preSelectedOption : await this.showOptions();
     if (selectedOption === this.options.length) return { selectedOption, data: "logout" };
-    const reqPayload = await this.handleOption(selectedOption, !!event);
+    const reqPayload = await this.optionsHandler(selectedOption, !!event);
     return reqPayload;
   }
 
@@ -40,7 +40,7 @@ class EmployeeClient {
     return verifiedOption;
   }
 
-  async handleOption(selectedOption, isPreSelected?: boolean) {
+  async optionsHandler(selectedOption, isPreSelected?: boolean) {
 
     if (this.noQuestionsOptions.includes(selectedOption) && !isPreSelected) {
       return { selectedOption: selectedOption, data: null };

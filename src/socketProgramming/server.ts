@@ -7,6 +7,7 @@ import EmployeeController from "../ServerController/employee.server";
 import { UserRole } from "../Enums/userRoles.enum";
 import { SocketEvent } from "../Enums/socketEvent.enum";
 import { ResponseInterface } from "../Interface/Response";
+import { DatabaseError } from "../Exceptions/database-exception";
 
 dotenv.config();
 

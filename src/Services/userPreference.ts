@@ -1,4 +1,5 @@
 import { DietType, SpiceLevel } from "../Enums/userPreference.enum";
+import { NotFoundError } from "../Exceptions/notFound-exception";
 import { UserPreference } from "../Interface/UserPreference";
 import { UserPreferenceRepository } from "../Repository/userPreference";
 
@@ -13,7 +14,7 @@ export class UserPreferenceService {
     const userPreference =
       await this.userPreferenceRepository.getUserPreference(userId);
     if (!userPreference) {
-      throw new Error("[Warning] User preference not found for the user");
+      throw new NotFoundError("[Warning] User preference not found for the user");
     }
     return userPreference;
   }
@@ -27,7 +28,7 @@ export class UserPreferenceService {
   ): Promise<string> {
     const getUserPreference = await this.userPreferenceRepository.getUserPreference(userId);
     if (!getUserPreference) {
-      throw new Error("[Warning] User preference not found for the user");
+      throw new NotFoundError("[Warning] User preference not found for the user");
     }
     this.validateInputs(dietType, spiceLevel);  
 

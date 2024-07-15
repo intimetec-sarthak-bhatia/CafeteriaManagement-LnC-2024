@@ -1,6 +1,7 @@
 import { UserRoleRepository } from '../Repository/userRole';
 import { User } from '../Interface/User';
 import { UserRepository } from '../Repository/user';
+import { UnauthorizedError } from '../Exceptions/unauthorized-exception';
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -18,7 +19,7 @@ export class UserService {
   async getUserByEmail(email: string): Promise<User> {
     const user =  await this.userRepository.getUserByEmail(email);
     if (!user) {
-      throw new Error('Invalid Credentials!');
+      throw new UnauthorizedError('Invalid Credentials!');
     }
     return user;
   }

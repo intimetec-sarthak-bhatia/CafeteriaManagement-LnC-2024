@@ -1,3 +1,4 @@
+import { NotFoundError } from "../Exceptions/notFound-exception";
 import { MenuItem } from "../Interface/MenuItem";
 import { FeedBackRepository } from "../Repository/feedback";
 import SentimentAnalyzer from "../utils/sentimentAnalyzer";
@@ -16,7 +17,7 @@ export class FeedbackService {
     try {
       const isPresentInSelectedMenu = await this.isItemPresentInSelectedMenu(itemId);
       if(!isPresentInSelectedMenu) {
-        throw new Error('[WARNING!]Entered item was not present in yesterday\'s menu');
+        throw new NotFoundError('[WARNING!]Entered item was not present in yesterday\'s menu');
       }
       const feedbackExists = await this.checkFeedbackExists(itemId, userId);
       if(feedbackExists) {

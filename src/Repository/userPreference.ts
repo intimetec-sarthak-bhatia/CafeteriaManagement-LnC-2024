@@ -1,4 +1,5 @@
 import pool from '../database';
+import { DatabaseError } from '../Exceptions/database-exception';
 import { UserPreference } from '../Interface/UserPreference';
 
 export class UserPreferenceRepository {
@@ -11,7 +12,7 @@ export class UserPreferenceRepository {
       );
       return result.insertId;
     } catch (error) {
-      throw new Error(`Failed to add user preference: ${error.message}`);
+      throw new DatabaseError('Failed to add user preference', error);
     } finally {
       connection.release();
     }
@@ -25,7 +26,7 @@ export class UserPreferenceRepository {
         [userPreference.userId, userPreference.dietType, userPreference.spiceLevel, userPreference.preferredCuisine, userPreference.sweetTooth]
       );
     } catch (error) {
-      throw new Error(`Failed to update user preference: ${error.message}`);
+      throw new DatabaseError('Failed to update user preference', error);
     } finally {
       connection.release();
     }

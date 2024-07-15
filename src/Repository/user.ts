@@ -1,4 +1,5 @@
 import pool from '../database';
+import { DatabaseError } from '../Exceptions/database-exception';
 import { User } from '../Interface/User';
 
 export class UserRepository {
@@ -11,7 +12,7 @@ export class UserRepository {
       );
       return result.insertId;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error adding user', error);
     } finally {
       connection.release();
     }
@@ -25,7 +26,7 @@ export class UserRepository {
       );
       return rows;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching users', error);
     } finally {
       connection.release();
     }
@@ -40,7 +41,7 @@ export class UserRepository {
       );
       return rows[0];
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error fetching user', error);
     } finally {
       connection.release();
     }

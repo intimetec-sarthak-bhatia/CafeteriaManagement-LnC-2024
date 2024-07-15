@@ -1,3 +1,4 @@
+import { DatabaseError } from '../Exceptions/database-exception';
 import { DailyRecommendationRollout } from '../Interface/DailyRecommendationRollout';
 import pool from '../database';
 
@@ -13,7 +14,7 @@ export class DailyRecommendationRolloutRepository {
       );
       return rows[0]?.type || null;
     } catch (error) {
-      throw error;
+      throw new DatabaseError('Error adding daily recommendation rollout', error);
     } finally {
       connection.release();
     }
@@ -36,7 +37,7 @@ export class DailyRecommendationRolloutRepository {
             );
             return rows;
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error Fetching Daily Recommendation', error);
         } finally {
             connection.release();
         }
@@ -51,7 +52,7 @@ export class DailyRecommendationRolloutRepository {
             );
             return rows;
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error fetching finalized menu items', error);
         } finally {
             connection.release();
         }
@@ -68,7 +69,7 @@ export class DailyRecommendationRolloutRepository {
             }
             return 'Selected menu updated successfully!';
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error updating selected items for recommendation rollout', error);
         } finally {
             connection.release();
         }
@@ -84,7 +85,7 @@ export class DailyRecommendationRolloutRepository {
             );
             return 'Vote count updated successfully!';
         } catch (error) {
-            throw error;
+            throw new DatabaseError('Error updating vote count', error);
         } finally {
             connection.release();
         }

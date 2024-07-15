@@ -5,6 +5,7 @@ import { MealCategory } from "../Enums/mealCategory.enum";
 import { NotificationService } from "./notification";
 import { UserPreference } from "../Interface/UserPreference";
 import { UserPreferenceRepository } from "../Repository/userPreference";
+import { NotFoundError } from "../Exceptions/notFound-exception";
 
 export class DailyRecommendationRolloutService {
   private dailyRecommendationRolloutRepository =
@@ -57,7 +58,8 @@ export class DailyRecommendationRolloutService {
       await this.dailyRecommendationRolloutRepository.getDailyRecommendationRolloutByDate(
         formattedDate
       );
-    return result;
+
+    return this.deleteUnwantedColumns(result);
   }
 
   async getTodaysByUser(userId: number): Promise<any[]> {
@@ -68,20 +70,29 @@ export class DailyRecommendationRolloutService {
         formattedDate
       );
 
-    const userPreference = await this.userPreferenceRepository.getUserPreference(userId);
-    if(!userPreference) {
-      return this.deleteUnwantedCOlunmns(result);
+    const userPreference =
+      await this.userPreferenceRepository.getUserPreference(userId);
+    if (!userPreference) {
+      return this.deleteUnwantedColumns(result);
     }
-    const sortedItemsByPreference = this.sortItemsByPreference(result, userPreference);
-    
-    return this.deleteUnwantedCOlunmns(sortedItemsByPreference);
+    const sortedItemsByPreference = this.sortItemsByPreference(
+      result,
+      userPreference
+    );
+
+    return this.deleteUnwantedColumns(sortedItemsByPreference);
   }
 
   sortItemsByPreference(items, userPreference: UserPreference) {
     items.sort((menuItem1, menuItem2) => {
-
-      const item1MatchesUserPreferences = this.isPreferenceFullMatch(menuItem1, userPreference);
-      const item2MatchesUserPreferences = this.isPreferenceFullMatch(menuItem2, userPreference);
+      const item1MatchesUserPreferences = this.isPreferenceFullMatch(
+        menuItem1,
+        userPreference
+      );
+      const item2MatchesUserPreferences = this.isPreferenceFullMatch(
+        menuItem2,
+        userPreference
+      );
 
       if (item1MatchesUserPreferences && !item2MatchesUserPreferences) {
         return -1;
@@ -113,7 +124,7 @@ export class DailyRecommendationRolloutService {
     const userPreferredCuisine = userPreference.preferredCuisine;
     const userSpiceLevel = userPreference.spiceLevel;
 
-    return ( 
+    return (
       item.dietType === userDietType &&
       item.cuisine === userPreferredCuisine &&
       item.spiceLevel === userSpiceLevel
@@ -136,16 +147,17 @@ export class DailyRecommendationRolloutService {
     const yesterdayDate = new Date(new Date().setDate(new Date().getDate() - 1))
       .toISOString()
       .split("T")[0];
-    const result =  await this.dailyRecommendationRolloutRepository.getSelectedMenuItems(
-      yesterdayDate
-    );
-    if(!result.length) {
-      throw new Error("[WARNING !] No menu items rolled out for yesterday");
+    const result =
+      await this.dailyRecommendationRolloutRepository.getSelectedMenuItems(
+        yesterdayDate
+      );
+    if (!result.length) {
+      throw new NotFoundError("[WARNING !] No menu items rolled out for yesterday");
     }
     return result;
   }
 
-  async deleteUnwantedCOlunmns(items) {
+  async deleteUnwantedColumns(items) {
     items.forEach((item) => {
       delete item.dietType;
       delete item.spiceLevel;
@@ -160,46 +172,46 @@ export class DailyRecommendationRolloutService {
     lunchId: number,
     dinnerId: number
   ) {
-      const date = new Date().toISOString().split("T")[0];
-      const rolledOutMenu =
-        await this.dailyRecommendationRolloutRepository.getDailyRecommendationRolloutByDate(
-          date
-        );
-      if (rolledOutMenu.length === 0) {
-        throw new Error("[WARNING !] No menu items rolled out for today");
-      }
-      const itemIds = rolledOutMenu.map((item) => item.itemId);
-      if (
-        !itemIds.includes(breakfastId) ||
-        !itemIds.includes(lunchId) ||
-        !itemIds.includes(dinnerId)
-      ) {
-        throw new Error(
-          "[WARNING !] Item provided doesn't exist in today's recommended rollout"
-        );
-      }
-      this.checkItemCategory(rolledOutMenu, breakfastId, lunchId, dinnerId);
-      const userVotesToday = await this.userVotesRepository.getVotesByDate(
-        userId,
+    const date = new Date().toISOString().split("T")[0];
+    const rolledOutMenu =
+      await this.dailyRecommendationRolloutRepository.getDailyRecommendationRolloutByDate(
         date
       );
-      if (userVotesToday.length === 3) {
-        throw new Error("[WARNING !] You have already voted menu for today");
-      }
-
-      const votedRollOutMenuIds: number[] = await this.incrementVoteCount(
-        rolledOutMenu,
-        breakfastId,
-        lunchId,
-        dinnerId
+    if (!rolledOutMenu.length) {
+      throw new NotFoundError("[WARNING !] No menu items rolled out for today");
+    }
+    const itemIds = rolledOutMenu.map((item) => item.itemId);
+    if (
+      !itemIds.includes(breakfastId) ||
+      !itemIds.includes(lunchId) ||
+      !itemIds.includes(dinnerId)
+    ) {
+      throw new Error(
+        "[WARNING !] Item provided doesn't exist in today's recommended rollout"
       );
+    }
+    this.checkItemCategory(rolledOutMenu, breakfastId, lunchId, dinnerId);
+    const userVotesToday = await this.userVotesRepository.getVotesByDate(
+      userId,
+      date
+    );
+    if (userVotesToday.length === 3) {
+      throw new Error("[WARNING !] You have already voted menu for today");
+    }
 
-      const result = await this.userVotesRepository.addUserVote(
-        userId,
-        votedRollOutMenuIds,
-        date
-      );
-      return result;
+    const votedRollOutMenuIds: number[] = await this.incrementVoteCount(
+      rolledOutMenu,
+      breakfastId,
+      lunchId,
+      dinnerId
+    );
+
+    const result = await this.userVotesRepository.addUserVote(
+      userId,
+      votedRollOutMenuIds,
+      date
+    );
+    return result;
   }
 
   async finalizeMenu(
@@ -221,7 +233,7 @@ export class DailyRecommendationRolloutService {
       ...dinner,
     ]);
     if (!itemsExistsInMenu) {
-      throw new Error(
+      throw new NotFoundError(
         "[ Warning !! ] Item provided doesn't exist in today's recommended rollout"
       );
     }
