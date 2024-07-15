@@ -27,5 +27,9 @@
     "start:client": "ts-node src/socketProgramming/client.ts",
     "run:file": "ts-node src/index.ts",
     "test": "jest"
-  }
+  },
+  "jest": {
+  "preset": "ts-jest",
+  "testEnvironment": "node"
+}
 }
