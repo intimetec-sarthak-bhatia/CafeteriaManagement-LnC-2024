@@ -1,4 +1,4 @@
-import pool from "../database";
+import pool from "../utils/database";
 
 export class UserVotesRepository {
 

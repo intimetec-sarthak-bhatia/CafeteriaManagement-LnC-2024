@@ -1,6 +1,6 @@
 import { DatabaseError } from '../Exceptions/database-exception';
 import { Notification } from '../Interface/Notification';
-import pool from '../database';
+import pool from '../utils/database';
 
 
 export class NotificationRepository {
