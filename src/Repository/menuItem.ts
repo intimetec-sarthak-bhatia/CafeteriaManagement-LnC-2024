@@ -1,4 +1,4 @@
-import pool from "../utils/database";
+import pool from "../Utils/database";
 import { DatabaseError } from "../Exceptions/database-exception";
 import { MenuItem } from "../Interface/MenuItem";
 

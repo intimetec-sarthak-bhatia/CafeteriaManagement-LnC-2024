@@ -1,5 +1,5 @@
 import { DatabaseError } from '../Exceptions/database-exception';
-import pool from '../utils/database';
+import pool from '../Utils/database';
 
 export class MealTypeRepository {
   async getMealTypeById(id: number): Promise<string> {

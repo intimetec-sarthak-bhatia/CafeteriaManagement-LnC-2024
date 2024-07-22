@@ -1,7 +1,7 @@
 import { NotFoundError } from "../Exceptions/notFound-exception";
 import { MenuItem } from "../Interface/MenuItem";
 import { FeedBackRepository } from "../Repository/feedback";
-import SentimentAnalyzer from "../utils/sentimentAnalyzer";
+import SentimentAnalyzer from "../Utils/sentimentAnalyzer";
 import { DailyRecommendationRolloutService } from "./dailyRecommendationRollout";
 import { MenuItemService } from "./menuItem";
 

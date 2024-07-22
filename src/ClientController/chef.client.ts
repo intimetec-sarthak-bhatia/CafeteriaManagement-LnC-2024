@@ -1,6 +1,6 @@
 import { NO_QUESTIONS_OPTIONS, NUM_TYPE_QUESTIONS, QUESTIONS, USER_OPTIONS } from "../Enums/userOptions.enum";
 import { ResponseInterface } from "../Interface/Response";
-import PromptUtils from "../utils/PromptUtils";
+import PromptUtils from "../Utils/promptUtils";
 
 class ChefClient {
   private options: string[];

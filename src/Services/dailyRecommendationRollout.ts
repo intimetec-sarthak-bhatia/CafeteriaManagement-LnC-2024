@@ -1,11 +1,11 @@
 import { DailyRecommendationRollout } from "../Interface/DailyRecommendationRollout";
 import { DailyRecommendationRolloutRepository } from "../Repository/dailyRecommendationRollout";
 import { UserVotesRepository } from "../Repository/userVotes";
-import { MealCategory } from "../Enums/mealCategory.enum";
 import { NotificationService } from "./notification";
 import { UserPreference } from "../Interface/UserPreference";
 import { UserPreferenceRepository } from "../Repository/userPreference";
 import { NotFoundError } from "../Exceptions/notFound-exception";
+import { MealCategory } from "../Enums/mealCategory.enum";
 
 export class DailyRecommendationRolloutService {
   private dailyRecommendationRolloutRepository =
@@ -51,7 +51,7 @@ export class DailyRecommendationRolloutService {
     return "Daily Recommendations added successfully!";
   }
 
-  async getTodays(): Promise<any[]> {
+  async getTodays(): Promise<any> {
     const date = new Date();
     const formattedDate = date.toISOString().split("T")[0];
     const result =
@@ -62,7 +62,7 @@ export class DailyRecommendationRolloutService {
     return this.deleteUnwantedColumns(result);
   }
 
-  async getTodaysByUser(userId: number): Promise<any[]> {
+  async getTodaysByUser(userId: number): Promise<any> {
     const date = new Date();
     const formattedDate = date.toISOString().split("T")[0];
     const result =

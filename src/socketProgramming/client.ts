@@ -1,13 +1,14 @@
 import { Socket, io } from 'socket.io-client';
-import PromptUtils from '../utils/PromptUtils';
+import PromptUtils from '../Utils/promptUtils';
 import * as dotenv from 'dotenv';
 import AdminClient from '../ClientController/admin.client';
 import ChefClient from '../ClientController/chef.client';
 import EmployeeClient from '../ClientController/employee.client';
 import { UserRole } from '../Enums/userRoles.enum';
-import { SocketEvent } from '../Enums/socketEvent.enum';
 import { User } from '../Interface/User';
-import { RequestInterface } from '../Interface/Request';
+import { ResponseInterface } from '../Interface/Response';
+import { SocketEvent } from '../Enums/socketEvent.enum';
+import { RequestInterface } from '../Interface/request';
 
 dotenv.config();
 
@@ -87,7 +88,7 @@ class CafeteriaManagementClient {
     }
 
     async handleResponse(user: User): Promise<void> {
-        this.socket.on(SocketEvent.RESPONSE, async (response: any) => {
+        this.socket.on(SocketEvent.RESPONSE, async (response: ResponseInterface) => {
             switch(user.role) {
                 case UserRole.Admin:
                     await this.adminClient.responseHandler(response);

@@ -1,6 +1,6 @@
 import { USER_OPTIONS, QUESTIONS, NO_QUESTIONS_OPTIONS, NUM_TYPE_QUESTIONS } from "../Enums/userOptions.enum";
 import { ResponseInterface } from "../Interface/Response";
-import PromptUtils from "../utils/PromptUtils";
+import PromptUtils from "../Utils/promptUtils";
 
 class EmployeeClient {
   private options: string[];

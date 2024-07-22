@@ -1,5 +1,5 @@
 import { pipeline } from "transformer.ts";
-import SentimentAnalyzer from "../src/utils/sentimentAnalyzer";
+import SentimentAnalyzer from "../src/Utils/sentimentAnalyzer";
 
 jest.mock("transformer.ts", () => ({
   pipeline: jest.fn(),

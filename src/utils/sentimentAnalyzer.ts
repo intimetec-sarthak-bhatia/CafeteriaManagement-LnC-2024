@@ -1,11 +1,12 @@
 import { pipeline } from "transformer.ts";
+import { PipelineInterface } from "../Interface/SentimentAnalyzerPipeline";
 
 class SentimentAnalyzer {
   
   async analyzeSentiment(text: string): Promise<number> {
     const classifier = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
-    const result: any = await classifier(text);
-    const sentiment = result[0];
+    const result = await classifier(text);
+    const sentiment : PipelineInterface = result[0];
     const star = this.getStarRating(sentiment.label);
 
     const scoreRange = this.getScoreRange(star);
