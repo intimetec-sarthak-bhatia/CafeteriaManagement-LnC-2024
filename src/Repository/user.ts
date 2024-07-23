@@ -1,4 +1,4 @@
-import pool from '../Utils/database';
+import pool from '../../Config/database';
 import { DatabaseError } from '../Exceptions/database-exception';
 import { User } from '../Interface/User';
 

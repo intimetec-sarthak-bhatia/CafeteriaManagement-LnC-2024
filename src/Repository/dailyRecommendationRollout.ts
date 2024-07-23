@@ -1,6 +1,6 @@
 import { DatabaseError } from '../Exceptions/database-exception';
 import { DailyRecommendationRollout } from '../Interface/DailyRecommendationRollout';
-import pool from '../Utils/database';
+import pool from '../../Config/database';
 
 export class DailyRecommendationRolloutRepository {
 

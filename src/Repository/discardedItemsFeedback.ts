@@ -1,5 +1,5 @@
 import { DatabaseError } from "../Exceptions/database-exception";
-import pool from "../Utils/database";
+import pool from "../../Config/database";
 
 export class DiscardedItemsFeedbackRepository {
 
