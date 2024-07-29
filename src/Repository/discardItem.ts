@@ -1,6 +1,6 @@
+import pool from "../../Config/database.config";
 import { DatabaseError } from "../Exceptions/database-exception";
 import { MenuItem } from "../Interface/MenuItem";
-import pool from "../../Config/database";
 
 export class DiscardItemRepository {
   async suggestDiscardedItems(): Promise<MenuItem[]> {

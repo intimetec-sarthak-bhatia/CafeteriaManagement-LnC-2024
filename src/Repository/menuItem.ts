@@ -1,4 +1,4 @@
-import pool from "../../Config/database";
+import pool from "../../Config/database.config";
 import { DatabaseError } from "../Exceptions/database-exception";
 import { MenuItem } from "../Interface/MenuItem";
 

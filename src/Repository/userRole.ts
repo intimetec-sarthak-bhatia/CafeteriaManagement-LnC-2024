@@ -1,5 +1,5 @@
+import pool from '../../Config/database.config';
 import { UserRole } from '../Interface/UserRole';
-import pool from '../../Config/database';
 
 export class UserRoleRepository {
   async createUserRole(roleName: string): Promise<number> {

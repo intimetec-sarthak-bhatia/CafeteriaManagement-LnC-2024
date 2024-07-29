@@ -1,5 +1,5 @@
+import pool from '../../Config/database.config';
 import { DatabaseError } from '../Exceptions/database-exception';
-import pool from '../../Config/database';
 
 export class FeedBackRepository {
 

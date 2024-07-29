@@ -1,4 +1,4 @@
-import pool from "../../Config/database";
+import pool from "../../Config/database.config";
 
 export class UserVotesRepository {
 
